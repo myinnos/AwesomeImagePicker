@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="multiple_image_select_primary">#FFFFFF</color>
+    <color name="multiple_image_select_albumTextBackground">@color/colorPrimary</color>
+    <color name="multiple_image_select_imageSelectBackground">#000000</color>
+
+</resources>
