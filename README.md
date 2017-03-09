@@ -9,7 +9,7 @@ Awesome Image Picker library will pick images/gifs with beautiful interface. Sup
  `` ``
  ![Awesome Image Picker - Example4](https://s19.postimg.org/91nkdgnc3/Image_Picker_example_4.png)
  
-#### Download Demo APK from [HERE](https://github.com/myinnos/AwesomeImagePicker/blob/master/apk/image-picker-demo.apk "APK")
+#### Download Demo APK from [HERE](https://github.com/myinnos/AwesomeImagePicker/raw/master/apk/image-picker-demo.apk "APK")
   
 #### Kindly use the following links to use this library:
 
