@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Awesome Image Picker</string>
+    <string name="add">إضافة</string>
+    <string name="album_view">إختر ألبوم الصور</string>
+    <string name="capture_photo">إلتقاط صورة</string>
+    <string name="error_null_cursor">لقد حصل خطأ</string>
+    <string name="image_view">أنقر لختيار صورةأ</string>
+    <string name="limit_exceeded">\"يمكنك إختيار %d صور \"</string>
+    <string name="permission_force">التطبيق يحتاج لذن فتح الملفات لمعاينة الصور . أنقر إعدادات لمنح الأذن .</string>
+    <string name="permission_info">التطبيق يحتاج لذن فتح الملفات لمعاينة الصور . .</string>
+    <string name="permission_ok">حسنا</string>
+    <string name="permission_package">المجلد</string>
+    <string name="permission_settings">الاعدادات</string>
+    <string name="selected">مختارة</string>
+</resources>
