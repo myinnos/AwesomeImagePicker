@@ -47,6 +47,10 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, LIMIT);
                         startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
                     }
+                }else{
+                    Intent intent = new Intent(MainActivity.this, AlbumSelectActivity.class);
+                    intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, LIMIT);
+                    startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
                 }
             }
         });
