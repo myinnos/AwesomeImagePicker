@@ -25,7 +25,7 @@ allprojects {
 And then in the other gradle file(may be your app gradle or your own module library gradle, but never add in both of them to avoid conflict.)
 ```java
 dependencies {
-    compile 'com.github.myinnos:AwesomeImagePicker:1.0'
+    compile 'com.github.myinnos:AwesomeImagePicker:1.0.1'
 }
 ```
 How to use
