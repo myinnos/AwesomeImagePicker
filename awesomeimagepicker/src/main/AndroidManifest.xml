@@ -13,9 +13,11 @@
 
         <activity
             android:name=".activities.AlbumSelectActivity"
+            android:screenOrientation="portrait"
             android:hardwareAccelerated="true" />
         <activity
             android:name=".activities.ImageSelectActivity"
+            android:screenOrientation="portrait"
             android:hardwareAccelerated="true" />
 
     </application>
