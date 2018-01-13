@@ -30,6 +30,7 @@ import in.myinnos.awesomeimagepicker.adapter.CustomAlbumSelectAdapter;
 import in.myinnos.awesomeimagepicker.R;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
 import in.myinnos.awesomeimagepicker.models.Album;
+import in.myinnos.awesomeimagepicker.models.MediaStoreType;
 
 import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_in;
 import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
@@ -53,10 +54,15 @@ public class AlbumSelectActivity extends HelperActivity {
     private Handler handler;
     private Thread thread;
 
-    private final String[] projection = new String[]{
+    private final String[] projectionImages = new String[]{
             MediaStore.Images.Media.BUCKET_ID,
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Images.Media.DATA};
+
+    private final String[] projectionVideos = new String[]{
+            MediaStore.Video.Media.BUCKET_ID,
+            MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
+            MediaStore.Video.Media.DATA};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +75,14 @@ public class AlbumSelectActivity extends HelperActivity {
             finish();
         }
         ConstantsCustomGallery.limit = intent.getIntExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, ConstantsCustomGallery.DEFAULT_LIMIT);
+
+        ConstantsCustomGallery.mediaStoreType = MediaStoreType.IMAGES;
+        if (intent.hasExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIASTORETYPE)) {
+            MediaStoreType mediaStoreType = (MediaStoreType) intent.getSerializableExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIASTORETYPE);
+            if (mediaStoreType != null && mediaStoreType == MediaStoreType.VIDEOS) {
+                ConstantsCustomGallery.mediaStoreType = MediaStoreType.VIDEOS;
+            }
+        }
 
         errorDisplay = (TextView) findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
@@ -86,6 +100,11 @@ public class AlbumSelectActivity extends HelperActivity {
                     //HelperClass.displayMessageOnScreen(getApplicationContext(), "HMM!", false);
                 } else {
                     Intent intent = new Intent(getApplicationContext(), ImageSelectActivity.class);
+
+                    if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS) {
+                        intent = new Intent(getApplicationContext(), VideoSelectActivity.class);
+                    }
+
                     intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM, albums.get(position).name);
                     startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
                 }
@@ -122,7 +141,8 @@ public class AlbumSelectActivity extends HelperActivity {
 
                     case ConstantsCustomGallery.FETCH_COMPLETED: {
                         if (adapter == null) {
-                            adapter = new CustomAlbumSelectAdapter(AlbumSelectActivity.this, getApplicationContext(), albums);
+                            adapter = new CustomAlbumSelectAdapter(AlbumSelectActivity.this, getApplicationContext(),
+                                    albums, ConstantsCustomGallery.mediaStoreType);
                             gridView.setAdapter(adapter);
 
                             loader.setVisibility(View.GONE);
@@ -153,7 +173,13 @@ public class AlbumSelectActivity extends HelperActivity {
                 loadAlbums();
             }
         };
-        getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);
+
+        if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS) {
+            getContentResolver().registerContentObserver(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, false, observer);
+        }
+        else {
+            getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);
+        }
 
         checkPermission();
     }
@@ -252,9 +278,20 @@ public class AlbumSelectActivity extends HelperActivity {
                 sendMessage(ConstantsCustomGallery.FETCH_STARTED);
             }
 
-            Cursor cursor = getApplicationContext().getContentResolver()
-                    .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                            null, null, MediaStore.Images.Media.DATE_MODIFIED);
+            Cursor cursor;
+            String[] projection;
+            if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS) {
+                projection = projectionVideos;
+                cursor = getApplicationContext().getContentResolver()
+                        .query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
+                                null, null, MediaStore.Video.Media.DATE_MODIFIED);
+            } else {
+                projection = projectionImages;
+                cursor = getApplicationContext().getContentResolver()
+                        .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                                null, null, MediaStore.Images.Media.DATE_MODIFIED);
+            }
+
             if (cursor == null) {
                 sendMessage(ConstantsCustomGallery.ERROR);
                 return;

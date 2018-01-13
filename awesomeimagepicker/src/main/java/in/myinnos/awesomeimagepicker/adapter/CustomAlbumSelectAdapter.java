@@ -15,14 +15,19 @@ import java.util.ArrayList;
 
 import in.myinnos.awesomeimagepicker.R;
 import in.myinnos.awesomeimagepicker.models.Album;
+import in.myinnos.awesomeimagepicker.models.MediaStoreType;
 
 /**
  * Created by MyInnos on 03-11-2016.
  */
 public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
 
-    public CustomAlbumSelectAdapter(Activity activity, Context context, ArrayList<Album> albums) {
+    private MediaStoreType mediaStoreType;
+
+    public CustomAlbumSelectAdapter(Activity activity, Context context, ArrayList<Album> albums, MediaStoreType mediaStoreType) {
         super(activity, context, albums);
+
+        this.mediaStoreType = mediaStoreType;
     }
 
     @Override
@@ -34,6 +39,7 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
 
             viewHolder = new ViewHolder();
             viewHolder.imageView = (ImageView) convertView.findViewById(R.id.image_view_album_image);
+            viewHolder.iconPlayView = (ImageView) convertView.findViewById(R.id.image_view_icon_play);
             viewHolder.textView = (TextView) convertView.findViewById(R.id.text_view_album_name);
 
             convertView.setTag(viewHolder);
@@ -46,6 +52,12 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
         viewHolder.imageView.getLayoutParams().height = size;
 
         viewHolder.textView.setText(arrayList.get(position).name);
+
+        if (mediaStoreType == MediaStoreType.VIDEOS) {
+            viewHolder.iconPlayView.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.iconPlayView.setVisibility(View.GONE);
+        }
 
         if (arrayList.get(position).name.equals("Take Photo")) {
 
@@ -70,6 +82,7 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
 
     private static class ViewHolder {
         ImageView imageView;
+        ImageView iconPlayView;
         TextView textView;
     }
 }

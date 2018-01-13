@@ -1,5 +1,7 @@
 package in.myinnos.awesomeimagepicker.helpers;
 
+import in.myinnos.awesomeimagepicker.models.MediaStoreType;
+
 /**
  * Created by MyInnos on 03-11-2016.
  */
@@ -22,9 +24,14 @@ public class ConstantsCustomGallery {
 
     public static final String INTENT_EXTRA_ALBUM = "album";
     public static final String INTENT_EXTRA_IMAGES = "images";
+    public static final String INTENT_EXTRA_VIDEOS = "videos";
     public static final String INTENT_EXTRA_LIMIT = "limit";
+    public static final String INTENT_EXTRA_MEDIASTORETYPE = "mediaStoreType";
     public static final int DEFAULT_LIMIT = 10;
 
     //Maximum number of images that can be selected at a time
     public static int limit;
+
+    //Type of media
+    public static MediaStoreType mediaStoreType;
 }
