@@ -69,7 +69,7 @@ public class CustomVideoSelectAdapter extends CustomGenericAdapter<Video> {
                 long millis = Long.parseLong(video.duration);
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
-                String duration = String.format(Locale.getDefault(), "%d:%2d", minutes, seconds);
+                String duration = String.format(Locale.getDefault(), "%d:%02d", minutes, seconds);
 
                 viewHolder.videoDuration.setVisibility(View.VISIBLE);
                 viewHolder.videoDuration.setText(duration);
