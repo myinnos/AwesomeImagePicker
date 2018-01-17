@@ -25,10 +25,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import in.myinnos.awesomeimagepicker.adapter.CustomImageSelectAdapter;
 import in.myinnos.awesomeimagepicker.R;
+import in.myinnos.awesomeimagepicker.adapter.CustomVideoSelectAdapter;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
-import in.myinnos.awesomeimagepicker.models.Image;
+import in.myinnos.awesomeimagepicker.models.Video;
 
 import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_in;
 import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
@@ -36,8 +36,8 @@ import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
 /**
  * Created by MyInnos on 03-11-2016.
  */
-public class ImageSelectActivity extends HelperActivity {
-    private ArrayList<Image> images;
+public class VideoSelectActivity extends HelperActivity {
+    private ArrayList<Video> videos;
     private String album;
 
     private TextView errorDisplay, tvProfile, tvAdd, tvSelectCount;
@@ -45,7 +45,7 @@ public class ImageSelectActivity extends HelperActivity {
 
     private ProgressBar loader;
     private GridView gridView;
-    private CustomImageSelectAdapter adapter;
+    private CustomVideoSelectAdapter adapter;
 
 
     private int countSelected;
@@ -56,9 +56,10 @@ public class ImageSelectActivity extends HelperActivity {
 
     private final String[] projection =
             new String[] {
-                    MediaStore.Images.Media._ID,
-                    MediaStore.Images.Media.DISPLAY_NAME,
-                    MediaStore.Images.Media.DATA };
+                    MediaStore.Video.Media._ID,
+                    MediaStore.Video.Media.DISPLAY_NAME,
+                    MediaStore.Video.Media.DURATION,
+                    MediaStore.Video.Media.DATA };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,7 @@ public class ImageSelectActivity extends HelperActivity {
         tvProfile = (TextView) findViewById(R.id.tvProfile);
         tvAdd = (TextView) findViewById(R.id.tvAdd);
         tvSelectCount = (TextView) findViewById(R.id.tvSelectCount);
-        tvProfile.setText(R.string.image_view);
+        tvProfile.setText(R.string.video_view);
         liFinish = (LinearLayout) findViewById(R.id.liFinish);
 
         Intent intent = getIntent();
@@ -144,13 +145,13 @@ public class ImageSelectActivity extends HelperActivity {
 
                     case ConstantsCustomGallery.FETCH_COMPLETED: {
                         /*
-                        If adapter is null, this implies that the loaded images will be shown
+                        If adapter is null, this implies that the loaded videos will be shown
                         for the first time, hence send FETCH_COMPLETED message.
                         However, if adapter has been initialised, this thread was run either
                         due to the activity being restarted or content being changed.
                          */
                         if (adapter == null) {
-                            adapter = new CustomImageSelectAdapter(ImageSelectActivity.this, getApplicationContext(), images);
+                            adapter = new CustomVideoSelectAdapter(VideoSelectActivity.this, getApplicationContext(), videos);
                             gridView.setAdapter(adapter);
 
                             loader.setVisibility(View.GONE);
@@ -160,7 +161,7 @@ public class ImageSelectActivity extends HelperActivity {
                         } else {
                             adapter.notifyDataSetChanged();
                             /*
-                            Some selected images may have been deleted
+                            Some selected videos may have been deleted
                             hence update action mode title
                              */
                             countSelected = msg.arg1;
@@ -192,7 +193,7 @@ public class ImageSelectActivity extends HelperActivity {
                 loadImages();
             }
         };
-        getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);
+        getContentResolver().registerContentObserver(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, false, observer);
 
         checkPermission();
     }
@@ -216,7 +217,7 @@ public class ImageSelectActivity extends HelperActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        images = null;
+        videos = null;
         if (adapter != null) {
             adapter.releaseResources();
         }
@@ -256,17 +257,17 @@ public class ImageSelectActivity extends HelperActivity {
     }
 
     private void toggleSelection(int position) {
-        if (!images.get(position).isSelected && countSelected >= ConstantsCustomGallery.limit) {
+        if (!videos.get(position).isSelected && countSelected >= ConstantsCustomGallery.limit) {
             Toast.makeText(
                     getApplicationContext(),
-                    String.format(getString(R.string.image_limit_exceeded), ConstantsCustomGallery.limit),
+                    String.format(getString(R.string.video_limit_exceeded), ConstantsCustomGallery.limit),
                     Toast.LENGTH_SHORT)
                     .show();
             return;
         }
 
-        images.get(position).isSelected = !images.get(position).isSelected;
-        if (images.get(position).isSelected) {
+        videos.get(position).isSelected = !videos.get(position).isSelected;
+        if (videos.get(position).isSelected) {
             countSelected++;
         } else {
             countSelected--;
@@ -279,26 +280,26 @@ public class ImageSelectActivity extends HelperActivity {
         tvAdd.setVisibility(View.GONE);
         tvSelectCount.setVisibility(View.GONE);
 
-        for (int i = 0, l = images.size(); i < l; i++) {
-            images.get(i).isSelected = false;
+        for (int i = 0, l = videos.size(); i < l; i++) {
+            videos.get(i).isSelected = false;
         }
         countSelected = 0;
         adapter.notifyDataSetChanged();
     }
 
-    private ArrayList<Image> getSelected() {
-        ArrayList<Image> selectedImages = new ArrayList<>();
-        for (int i = 0, l = images.size(); i < l; i++) {
-            if (images.get(i).isSelected) {
-                selectedImages.add(images.get(i));
+    private ArrayList<Video> getSelected() {
+        ArrayList<Video> selectedVideos = new ArrayList<>();
+        for (int i = 0, l = videos.size(); i < l; i++) {
+            if (videos.get(i).isSelected) {
+                selectedVideos.add(videos.get(i));
             }
         }
-        return selectedImages;
+        return selectedVideos;
     }
 
     private void sendIntent() {
         Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(ConstantsCustomGallery.INTENT_EXTRA_IMAGES, getSelected());
+        intent.putParcelableArrayListExtra(ConstantsCustomGallery.INTENT_EXTRA_VIDEOS, getSelected());
         setResult(RESULT_OK, intent);
         finish();
         overridePendingTransition(abc_fade_in, abc_fade_out);
@@ -315,27 +316,27 @@ public class ImageSelectActivity extends HelperActivity {
             /*
             If the adapter is null, this is first time this activity's view is
             being shown, hence send FETCH_STARTED message to show progress bar
-            while images are loaded from phone
+            while videos are loaded from phone
              */
             if (adapter == null) {
                 sendMessage(ConstantsCustomGallery.FETCH_STARTED);
             }
 
             File file;
-            HashSet<Long> selectedImages = new HashSet<>();
-            if (images != null) {
-                Image image;
-                for (int i = 0, l = images.size(); i < l; i++) {
-                    image = images.get(i);
-                    file = new File(image.path);
-                    if (file.exists() && image.isSelected) {
-                        selectedImages.add(image.id);
+            HashSet<Long> selectedVideos = new HashSet<>();
+            if (videos != null) {
+                Video video;
+                for (int i = 0, l = videos.size(); i < l; i++) {
+                    video = videos.get(i);
+                    file = new File(video.path);
+                    if (file.exists() && video.isSelected) {
+                        selectedVideos.add(video.id);
                     }
                 }
             }
 
-            Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED);
+            Cursor cursor = getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
+                    MediaStore.Video.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Video.Media.DATE_ADDED);
             if (cursor == null) {
                 sendMessage(ConstantsCustomGallery.ERROR);
                 return;
@@ -344,11 +345,11 @@ public class ImageSelectActivity extends HelperActivity {
             /*
             In case this runnable is executed to onChange calling loadImages,
             using countSelected variable can result in a race condition. To avoid that,
-            tempCountSelected keeps track of number of selected images. On handling
+            tempCountSelected keeps track of number of selected videos. On handling
             FETCH_COMPLETED message, countSelected is assigned value of tempCountSelected.
              */
             int tempCountSelected = 0;
-            ArrayList<Image> temp = new ArrayList<>(cursor.getCount());
+            ArrayList<Video> temp = new ArrayList<>(cursor.getCount());
             if (cursor.moveToLast()) {
                 do {
                     if (Thread.interrupted()) {
@@ -357,8 +358,9 @@ public class ImageSelectActivity extends HelperActivity {
 
                     long id = cursor.getLong(cursor.getColumnIndex(projection[0]));
                     String name = cursor.getString(cursor.getColumnIndex(projection[1]));
-                    String path = cursor.getString(cursor.getColumnIndex(projection[2]));
-                    boolean isSelected = selectedImages.contains(id);
+                    String duration = cursor.getString(cursor.getColumnIndex(projection[2]));
+                    String path = cursor.getString(cursor.getColumnIndex(projection[3]));
+                    boolean isSelected = selectedVideos.contains(id);
                     if (isSelected) {
                         tempCountSelected++;
                     }
@@ -371,18 +373,18 @@ public class ImageSelectActivity extends HelperActivity {
                     }
 
                     if (file.exists()) {
-                        temp.add(new Image(id, name, path, isSelected));
+                        temp.add(new Video(id, name, duration, path, isSelected));
                     }
 
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
 
-            if (images == null) {
-                images = new ArrayList<>();
+            if (videos == null) {
+                videos = new ArrayList<>();
             }
-            images.clear();
-            images.addAll(temp);
+            videos.clear();
+            videos.addAll(temp);
 
             sendMessage(ConstantsCustomGallery.FETCH_COMPLETED, tempCountSelected);
         }

@@ -17,6 +17,13 @@
         android:contentDescription="@string/app_name"
         android:scaleType="centerCrop" />
 
+    <ImageView
+        android:id="@+id/image_view_icon_play"
+        android:layout_gravity="center"
+        android:background="@drawable/ic_aip_play"
+        android:layout_width="25dp"
+        android:layout_height="25dp"/>
+
     <TextView
         android:id="@+id/text_view_album_name"
         android:layout_width="match_parent"
