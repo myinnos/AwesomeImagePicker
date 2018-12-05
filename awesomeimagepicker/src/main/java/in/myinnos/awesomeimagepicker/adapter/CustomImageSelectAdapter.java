@@ -2,6 +2,7 @@ package in.myinnos.awesomeimagepicker.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,12 +10,15 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import in.myinnos.awesomeimagepicker.R;
 import in.myinnos.awesomeimagepicker.models.Image;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 /**
  * Created by MyInnos on 03-11-2016.
@@ -59,11 +63,20 @@ public class CustomImageSelectAdapter extends CustomGenericAdapter<Image> {
 
         Uri uri = Uri.fromFile(new File(arrayList.get(position).path));
 
+        /*
         Glide.with(context).load(uri)
-                .placeholder(R.color.colorAccent)
+                .placeholder(0xFFFF4081)
                 .override(200, 200)
                 .crossFade()
                 .centerCrop()
+                .into(viewHolder.imageView);
+                */
+        Glide.with(context)
+                .load(uri)
+                .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))
+                .apply(RequestOptions.overrideOf(200, 200))
+                .apply(RequestOptions.centerCropTransform())
+                .transition(withCrossFade())
                 .into(viewHolder.imageView);
 
         return convertView;

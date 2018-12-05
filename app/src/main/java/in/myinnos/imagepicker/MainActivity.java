@@ -2,6 +2,7 @@ package in.myinnos.imagepicker;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 import in.myinnos.awesomeimagepicker.activities.AlbumSelectActivity;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
 import in.myinnos.awesomeimagepicker.models.Image;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,11 +71,20 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < images.size(); i++) {
                 Uri uri = Uri.fromFile(new File(images.get(i).path));
 
+                /*
                 Glide.with(this).load(uri)
-                        .placeholder(R.color.colorAccent)
+                        .placeholder(0xFFFF4081)
                         .override(400, 400)
                         .crossFade()
                         .centerCrop()
+                        .into(imageView);
+                        */
+                Glide.with(this)
+                        .load(uri)
+                        .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))
+                        .apply(RequestOptions.overrideOf(400, 400))
+                        .apply(RequestOptions.centerCropTransform())
+                        .transition(withCrossFade())
                         .into(imageView);
 
                 txImageSelects.setText(txImageSelects.getText().toString().trim()
