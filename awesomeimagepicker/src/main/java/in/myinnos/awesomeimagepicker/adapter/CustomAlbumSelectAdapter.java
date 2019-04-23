@@ -42,9 +42,9 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
             convertView = layoutInflater.inflate(R.layout.grid_view_item_album_select, null);
 
             viewHolder = new ViewHolder();
-            viewHolder.imageView = (ImageView) convertView.findViewById(R.id.image_view_album_image);
-            viewHolder.iconPlayView = (ImageView) convertView.findViewById(R.id.image_view_icon_play);
-            viewHolder.textView = (TextView) convertView.findViewById(R.id.text_view_album_name);
+            viewHolder.imageView = convertView.findViewById(R.id.image_view_album_image);
+            viewHolder.iconPlayView = convertView.findViewById(R.id.image_view_icon_play);
+            viewHolder.textView = convertView.findViewById(R.id.text_view_album_name);
 
             convertView.setTag(viewHolder);
 

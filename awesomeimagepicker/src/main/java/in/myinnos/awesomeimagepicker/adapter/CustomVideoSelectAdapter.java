@@ -42,9 +42,9 @@ public class CustomVideoSelectAdapter extends CustomGenericAdapter<Video> {
             convertView = layoutInflater.inflate(R.layout.grid_view_video_select, null);
 
             viewHolder = new ViewHolder();
-            viewHolder.imageView = (ImageView) convertView.findViewById(R.id.image_view_image_select);
-            viewHolder.iconPlayView = (ImageView) convertView.findViewById(R.id.image_view_icon_play);
-            viewHolder.videoDuration = (TextView) convertView.findViewById(R.id.text_view_duration);
+            viewHolder.imageView = convertView.findViewById(R.id.image_view_image_select);
+            viewHolder.iconPlayView = convertView.findViewById(R.id.image_view_icon_play);
+            viewHolder.videoDuration = convertView.findViewById(R.id.text_view_duration);
             viewHolder.view = convertView.findViewById(R.id.view_alpha);
 
             convertView.setTag(viewHolder);
@@ -73,6 +73,9 @@ public class CustomVideoSelectAdapter extends CustomGenericAdapter<Video> {
                 long millis = Long.parseLong(video.duration);
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+                if (seconds > 59) {
+                    seconds = seconds % 60;
+                }
                 String duration = String.format(Locale.getDefault(), "%d:%02d", minutes, seconds);
 
                 viewHolder.videoDuration.setVisibility(View.VISIBLE);
