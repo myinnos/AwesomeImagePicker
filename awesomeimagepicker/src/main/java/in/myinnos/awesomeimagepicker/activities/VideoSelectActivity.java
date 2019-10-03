@@ -67,11 +67,11 @@ public class VideoSelectActivity extends HelperActivity {
         setContentView(R.layout.activity_image_select);
         setView(findViewById(R.id.layout_image_select));
 
-        tvProfile = (TextView) findViewById(R.id.tvProfile);
-        tvAdd = (TextView) findViewById(R.id.tvAdd);
-        tvSelectCount = (TextView) findViewById(R.id.tvSelectCount);
+        tvProfile = findViewById(R.id.tvProfile);
+        tvAdd = findViewById(R.id.tvAdd);
+        tvSelectCount = findViewById(R.id.tvSelectCount);
         tvProfile.setText(R.string.video_view);
-        liFinish = (LinearLayout) findViewById(R.id.liFinish);
+        liFinish = findViewById(R.id.liFinish);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -79,11 +79,11 @@ public class VideoSelectActivity extends HelperActivity {
         }
         album = intent.getStringExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM);
 
-        errorDisplay = (TextView) findViewById(R.id.text_view_error);
+        errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
 
-        loader = (ProgressBar) findViewById(R.id.loader);
-        gridView = (GridView) findViewById(R.id.grid_view_image_select);
+        loader = findViewById(R.id.loader);
+        gridView = findViewById(R.id.grid_view_image_select);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

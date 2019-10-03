@@ -11,7 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBar;
+import androidx.appcompat.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
