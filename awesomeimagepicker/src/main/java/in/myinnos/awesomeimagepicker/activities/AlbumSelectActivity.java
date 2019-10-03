@@ -1,5 +1,6 @@
 package in.myinnos.awesomeimagepicker.activities;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -11,7 +12,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
-import androidx.appcompat.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,12 +22,13 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.File;
+import androidx.appcompat.app.ActionBar;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import in.myinnos.awesomeimagepicker.adapter.CustomAlbumSelectAdapter;
 import in.myinnos.awesomeimagepicker.R;
+import in.myinnos.awesomeimagepicker.adapter.CustomAlbumSelectAdapter;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
 import in.myinnos.awesomeimagepicker.models.Album;
 import in.myinnos.awesomeimagepicker.models.MediaStoreType;
@@ -54,15 +55,14 @@ public class AlbumSelectActivity extends HelperActivity {
     private Handler handler;
     private Thread thread;
 
-    private final String[] projectionImages = new String[]{
-            MediaStore.Images.Media.BUCKET_ID,
-            MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
-            MediaStore.Images.Media.DATA};
+    private final String[] albumProjection = new String[]{
+            MediaStore.MediaColumns.BUCKET_ID,
+            MediaStore.MediaColumns.BUCKET_DISPLAY_NAME
+    };
 
-    private final String[] projectionVideos = new String[]{
-            MediaStore.Video.Media.BUCKET_ID,
-            MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
-            MediaStore.Video.Media.DATA};
+    private final String[] mediaProjection = new String[] {
+            MediaStore.MediaColumns._ID,
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,19 +84,19 @@ public class AlbumSelectActivity extends HelperActivity {
             }
         }
 
-        errorDisplay = (TextView) findViewById(R.id.text_view_error);
+        errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
 
-        tvProfile = (TextView) findViewById(R.id.tvProfile);
+        tvProfile = findViewById(R.id.tvProfile);
         tvProfile.setText(R.string.album_view);
-        liFinish = (LinearLayout) findViewById(R.id.liFinish);
+        liFinish = findViewById(R.id.liFinish);
 
-        loader = (ProgressBar) findViewById(R.id.loader);
-        gridView = (GridView) findViewById(R.id.grid_view_album_select);
+        loader = findViewById(R.id.loader);
+        gridView = findViewById(R.id.grid_view_album_select);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (albums.get(position).name.equals(getString(R.string.capture_photo))) {
+                if (albums.get(position).getName().equals(getString(R.string.capture_photo))) {
                     //HelperClass.displayMessageOnScreen(getApplicationContext(), "HMM!", false);
                 } else {
                     Intent intent = new Intent(getApplicationContext(), ImageSelectActivity.class);
@@ -105,7 +105,8 @@ public class AlbumSelectActivity extends HelperActivity {
                         intent = new Intent(getApplicationContext(), VideoSelectActivity.class);
                     }
 
-                    intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM, albums.get(position).name);
+                    intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM, albums.get(position).getName());
+                    intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM_ID, albums.get(position).getId());
                     startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
                 }
             }
@@ -278,19 +279,11 @@ public class AlbumSelectActivity extends HelperActivity {
                 sendMessage(ConstantsCustomGallery.FETCH_STARTED);
             }
 
-            Cursor cursor;
-            String[] projection;
-            if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS) {
-                projection = projectionVideos;
-                cursor = getApplicationContext().getContentResolver()
-                        .query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
-                                null, null, MediaStore.Video.Media.DATE_MODIFIED);
-            } else {
-                projection = projectionImages;
-                cursor = getApplicationContext().getContentResolver()
-                        .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                                null, null, MediaStore.Images.Media.DATE_MODIFIED);
-            }
+            Uri externalContentUri = ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS ?
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+            Cursor cursor = getApplicationContext().getContentResolver().query(externalContentUri, albumProjection,
+                            null, null, MediaStore.Video.Media.DATE_MODIFIED);
 
             if (cursor == null) {
                 sendMessage(ConstantsCustomGallery.ERROR);
@@ -299,34 +292,25 @@ public class AlbumSelectActivity extends HelperActivity {
 
             ArrayList<Album> temp = new ArrayList<>(cursor.getCount());
             HashSet<Long> albumSet = new HashSet<>();
-            File file;
             if (cursor.moveToLast()) {
                 do {
                     if (Thread.interrupted()) {
                         return;
                     }
 
-                    long albumId = cursor.getLong(cursor.getColumnIndex(projection[0]));
-                    String album = cursor.getString(cursor.getColumnIndex(projection[1]));
-                    String image = cursor.getString(cursor.getColumnIndex(projection[2]));
+                    long id = cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns.BUCKET_ID));
+                    String name = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME));
 
-                    if (!albumSet.contains(albumId)) {
-                        /*
-                        It may happen that some image file paths are still present in cache,
-                        though image file does not exist. These last as long as media
-                        scanner is not run again. To avoid get such image file paths, check
-                        if image file exists.
-                         */
-                        file = new File(image);
-                        if (file.exists()) {
+                    if (!albumSet.contains(id)) {
 
+                        Uri uri = getThumbnail(externalContentUri, id);
+
+                        temp.add(new Album(id, name, uri));
+
+                        /*if (!album.equals("Hiding particular folder")) {
                             temp.add(new Album(album, image));
-
-                            /*if (!album.equals("Hiding particular folder")) {
-                                temp.add(new Album(album, image));
-                            }*/
-                            albumSet.add(albumId);
-                        }
+                        }*/
+                        albumSet.add(id);
                     }
 
                 } while (cursor.moveToPrevious());
@@ -344,6 +328,45 @@ public class AlbumSelectActivity extends HelperActivity {
 
             sendMessage(ConstantsCustomGallery.FETCH_COMPLETED);
         }
+    }
+
+    private Uri getThumbnail(Uri externalContentUri, long albumId) {
+
+        Uri uri = null;
+
+        Cursor cursor = getContentResolver().query(externalContentUri, mediaProjection,
+                MediaStore.MediaColumns.BUCKET_ID + " =?", new String[]{""+albumId}, MediaStore.MediaColumns.DATE_ADDED);
+
+        if (cursor == null) {
+            sendMessage(ConstantsCustomGallery.ERROR);
+            return null;
+        }
+
+        if (cursor.moveToLast()) {
+            do {
+                if (Thread.interrupted()) {
+                    return null;
+                }
+
+                long id = cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+
+                uri = ContentUris.withAppendedId(externalContentUri, id);
+
+                try {
+                    getContentResolver().openFileDescriptor(uri, "r");
+                } catch (Exception e) {
+                    // File doesn't actually exist
+                    continue;
+                }
+
+                // We only need one thumbnail
+                break;
+
+            } while (cursor.moveToPrevious());
+        }
+        cursor.close();
+
+        return uri;
     }
 
     private void startThread(Runnable runnable) {

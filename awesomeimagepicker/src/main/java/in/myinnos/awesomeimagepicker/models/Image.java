@@ -1,5 +1,6 @@
 package in.myinnos.awesomeimagepicker.models;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -7,15 +8,15 @@ import android.os.Parcelable;
  * Created by MyInnos on 03-11-2016.
  */
 public class Image implements Parcelable {
-    public long id;
-    public String name;
-    public String path;
-    public boolean isSelected;
+    private long id;
+    private String name;
+    private Uri uri;
+    private boolean isSelected;
 
-    public Image(long id, String name, String path, boolean isSelected) {
+    public Image(long id, String name, Uri uri, boolean isSelected) {
         this.id = id;
         this.name = name;
-        this.path = path;
+        this.uri = uri;
         this.isSelected = isSelected;
     }
 
@@ -28,7 +29,7 @@ public class Image implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeString(name);
-        dest.writeString(path);
+        dest.writeString(uri.toString());
     }
 
     public static final Creator<Image> CREATOR = new Creator<Image>() {
@@ -46,6 +47,38 @@ public class Image implements Parcelable {
     private Image(Parcel in) {
         id = in.readLong();
         name = in.readString();
-        path = in.readString();
+        uri = Uri.parse(in.readString());
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Uri getUri() {
+        return uri;
+    }
+
+    public void setUri(Uri uri) {
+        this.uri = uri;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
     }
 }

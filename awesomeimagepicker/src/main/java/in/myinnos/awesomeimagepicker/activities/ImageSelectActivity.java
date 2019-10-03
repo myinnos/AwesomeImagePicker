@@ -1,16 +1,17 @@
 package in.myinnos.awesomeimagepicker.activities;
 
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -21,12 +22,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import in.myinnos.awesomeimagepicker.adapter.CustomImageSelectAdapter;
 import in.myinnos.awesomeimagepicker.R;
+import in.myinnos.awesomeimagepicker.adapter.CustomImageSelectAdapter;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
 import in.myinnos.awesomeimagepicker.models.Image;
 
@@ -39,6 +39,7 @@ import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
 public class ImageSelectActivity extends HelperActivity {
     private ArrayList<Image> images;
     private String album;
+    private long albumId;
 
     private TextView errorDisplay, tvProfile, tvAdd, tvSelectCount;
     private LinearLayout liFinish;
@@ -54,11 +55,10 @@ public class ImageSelectActivity extends HelperActivity {
     private Handler handler;
     private Thread thread;
 
-    private final String[] projection =
-            new String[] {
-                    MediaStore.Images.Media._ID,
-                    MediaStore.Images.Media.DISPLAY_NAME,
-                    MediaStore.Images.Media.DATA };
+    private final String[] projection = new String[] {
+            MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DISPLAY_NAME
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,23 +66,24 @@ public class ImageSelectActivity extends HelperActivity {
         setContentView(R.layout.activity_image_select);
         setView(findViewById(R.id.layout_image_select));
 
-        tvProfile = (TextView) findViewById(R.id.tvProfile);
-        tvAdd = (TextView) findViewById(R.id.tvAdd);
-        tvSelectCount = (TextView) findViewById(R.id.tvSelectCount);
+        tvProfile = findViewById(R.id.tvProfile);
+        tvAdd = findViewById(R.id.tvAdd);
+        tvSelectCount = findViewById(R.id.tvSelectCount);
         tvProfile.setText(R.string.image_view);
-        liFinish = (LinearLayout) findViewById(R.id.liFinish);
+        liFinish = findViewById(R.id.liFinish);
 
         Intent intent = getIntent();
         if (intent == null) {
             finish();
         }
         album = intent.getStringExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM);
+        albumId = intent.getLongExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM_ID, 0);
 
-        errorDisplay = (TextView) findViewById(R.id.text_view_error);
+        errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
 
-        loader = (ProgressBar) findViewById(R.id.loader);
-        gridView = (GridView) findViewById(R.id.grid_view_image_select);
+        loader = findViewById(R.id.loader);
+        gridView = findViewById(R.id.grid_view_image_select);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -256,7 +257,7 @@ public class ImageSelectActivity extends HelperActivity {
     }
 
     private void toggleSelection(int position) {
-        if (!images.get(position).isSelected && countSelected >= ConstantsCustomGallery.limit) {
+        if (!images.get(position).isSelected() && countSelected >= ConstantsCustomGallery.limit) {
             Toast.makeText(
                     getApplicationContext(),
                     String.format(getString(R.string.image_limit_exceeded), ConstantsCustomGallery.limit),
@@ -265,8 +266,8 @@ public class ImageSelectActivity extends HelperActivity {
             return;
         }
 
-        images.get(position).isSelected = !images.get(position).isSelected;
-        if (images.get(position).isSelected) {
+        images.get(position).setSelected(!images.get(position).isSelected());
+        if (images.get(position).isSelected()) {
             countSelected++;
         } else {
             countSelected--;
@@ -280,7 +281,7 @@ public class ImageSelectActivity extends HelperActivity {
         tvSelectCount.setVisibility(View.GONE);
 
         for (int i = 0, l = images.size(); i < l; i++) {
-            images.get(i).isSelected = false;
+            images.get(i).setSelected(false);
         }
         countSelected = 0;
         adapter.notifyDataSetChanged();
@@ -289,7 +290,7 @@ public class ImageSelectActivity extends HelperActivity {
     private ArrayList<Image> getSelected() {
         ArrayList<Image> selectedImages = new ArrayList<>();
         for (int i = 0, l = images.size(); i < l; i++) {
-            if (images.get(i).isSelected) {
+            if (images.get(i).isSelected()) {
                 selectedImages.add(images.get(i));
             }
         }
@@ -321,21 +322,19 @@ public class ImageSelectActivity extends HelperActivity {
                 sendMessage(ConstantsCustomGallery.FETCH_STARTED);
             }
 
-            File file;
             HashSet<Long> selectedImages = new HashSet<>();
             if (images != null) {
                 Image image;
                 for (int i = 0, l = images.size(); i < l; i++) {
                     image = images.get(i);
-                    file = new File(image.path);
-                    if (file.exists() && image.isSelected) {
-                        selectedImages.add(image.id);
+                    if (image.isSelected()) {
+                        selectedImages.add(image.getId());
                     }
                 }
             }
 
             Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Images.Media.DATE_ADDED);
+                    MediaStore.MediaColumns.BUCKET_ID + " =?", new String[]{""+albumId}, MediaStore.MediaColumns.DATE_ADDED);
             if (cursor == null) {
                 sendMessage(ConstantsCustomGallery.ERROR);
                 return;
@@ -355,24 +354,24 @@ public class ImageSelectActivity extends HelperActivity {
                         return;
                     }
 
-                    long id = cursor.getLong(cursor.getColumnIndex(projection[0]));
-                    String name = cursor.getString(cursor.getColumnIndex(projection[1]));
-                    String path = cursor.getString(cursor.getColumnIndex(projection[2]));
+                    long id = cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME));
+
+                    Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+                    try {
+                        getContentResolver().openFileDescriptor(uri, "r");
+                    } catch (Exception e) {
+                        // File doesn't actually exist
+                        continue;
+                    }
+
                     boolean isSelected = selectedImages.contains(id);
                     if (isSelected) {
                         tempCountSelected++;
                     }
 
-                    file = null;
-                    try {
-                        file = new File(path);
-                    } catch (Exception e) {
-                        Log.d("Exception : ", e.toString());
-                    }
-
-                    if (file.exists()) {
-                        temp.add(new Image(id, name, path, isSelected));
-                    }
+                    temp.add(new Image(id, name, uri, isSelected));
 
                 } while (cursor.moveToPrevious());
             }

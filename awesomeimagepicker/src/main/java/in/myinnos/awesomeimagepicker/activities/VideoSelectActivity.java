@@ -1,16 +1,17 @@
 package in.myinnos.awesomeimagepicker.activities;
 
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -21,7 +22,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -39,6 +39,7 @@ import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
 public class VideoSelectActivity extends HelperActivity {
     private ArrayList<Video> videos;
     private String album;
+    private long albumId;
 
     private TextView errorDisplay, tvProfile, tvAdd, tvSelectCount;
     private LinearLayout liFinish;
@@ -47,19 +48,17 @@ public class VideoSelectActivity extends HelperActivity {
     private GridView gridView;
     private CustomVideoSelectAdapter adapter;
 
-
     private int countSelected;
 
     private ContentObserver observer;
     private Handler handler;
     private Thread thread;
 
-    private final String[] projection =
-            new String[] {
-                    MediaStore.Video.Media._ID,
-                    MediaStore.Video.Media.DISPLAY_NAME,
-                    MediaStore.Video.Media.DURATION,
-                    MediaStore.Video.Media.DATA };
+    private final String[] projection = new String[] {
+            MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.MediaColumns.DURATION
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +77,7 @@ public class VideoSelectActivity extends HelperActivity {
             finish();
         }
         album = intent.getStringExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM);
+        albumId = intent.getLongExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM_ID, 0);
 
         errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
@@ -257,7 +257,7 @@ public class VideoSelectActivity extends HelperActivity {
     }
 
     private void toggleSelection(int position) {
-        if (!videos.get(position).isSelected && countSelected >= ConstantsCustomGallery.limit) {
+        if (!videos.get(position).isSelected() && countSelected >= ConstantsCustomGallery.limit) {
             Toast.makeText(
                     getApplicationContext(),
                     String.format(getString(R.string.video_limit_exceeded), ConstantsCustomGallery.limit),
@@ -266,8 +266,8 @@ public class VideoSelectActivity extends HelperActivity {
             return;
         }
 
-        videos.get(position).isSelected = !videos.get(position).isSelected;
-        if (videos.get(position).isSelected) {
+        videos.get(position).setSelected(!videos.get(position).isSelected());
+        if (videos.get(position).isSelected()) {
             countSelected++;
         } else {
             countSelected--;
@@ -281,7 +281,7 @@ public class VideoSelectActivity extends HelperActivity {
         tvSelectCount.setVisibility(View.GONE);
 
         for (int i = 0, l = videos.size(); i < l; i++) {
-            videos.get(i).isSelected = false;
+            videos.get(i).setSelected(false);
         }
         countSelected = 0;
         adapter.notifyDataSetChanged();
@@ -290,7 +290,7 @@ public class VideoSelectActivity extends HelperActivity {
     private ArrayList<Video> getSelected() {
         ArrayList<Video> selectedVideos = new ArrayList<>();
         for (int i = 0, l = videos.size(); i < l; i++) {
-            if (videos.get(i).isSelected) {
+            if (videos.get(i).isSelected()) {
                 selectedVideos.add(videos.get(i));
             }
         }
@@ -322,21 +322,19 @@ public class VideoSelectActivity extends HelperActivity {
                 sendMessage(ConstantsCustomGallery.FETCH_STARTED);
             }
 
-            File file;
             HashSet<Long> selectedVideos = new HashSet<>();
             if (videos != null) {
                 Video video;
                 for (int i = 0, l = videos.size(); i < l; i++) {
                     video = videos.get(i);
-                    file = new File(video.path);
-                    if (file.exists() && video.isSelected) {
-                        selectedVideos.add(video.id);
+                    if (video.isSelected()) {
+                        selectedVideos.add(video.getId());
                     }
                 }
             }
 
             Cursor cursor = getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
-                    MediaStore.Video.Media.BUCKET_DISPLAY_NAME + " =?", new String[]{album}, MediaStore.Video.Media.DATE_ADDED);
+                    MediaStore.MediaColumns.BUCKET_ID + " =?", new String[]{"" + albumId}, MediaStore.Video.Media.DATE_ADDED);
             if (cursor == null) {
                 sendMessage(ConstantsCustomGallery.ERROR);
                 return;
@@ -356,25 +354,25 @@ public class VideoSelectActivity extends HelperActivity {
                         return;
                     }
 
-                    long id = cursor.getLong(cursor.getColumnIndex(projection[0]));
-                    String name = cursor.getString(cursor.getColumnIndex(projection[1]));
-                    String duration = cursor.getString(cursor.getColumnIndex(projection[2]));
-                    String path = cursor.getString(cursor.getColumnIndex(projection[3]));
+                    long id = cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME));
+                    String duration = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DURATION));
+
+                    Uri uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
+
+                    try {
+                        getContentResolver().openFileDescriptor(uri, "r");
+                    } catch (Exception e) {
+                        // File doesn't actually exist
+                        continue;
+                    }
+
                     boolean isSelected = selectedVideos.contains(id);
                     if (isSelected) {
                         tempCountSelected++;
                     }
 
-                    file = null;
-                    try {
-                        file = new File(path);
-                    } catch (Exception e) {
-                        Log.d("Exception : ", e.toString());
-                    }
-
-                    if (file.exists()) {
-                        temp.add(new Video(id, name, duration, path, isSelected));
-                    }
+                    temp.add(new Video(id, name, duration, uri, isSelected));
 
                 } while (cursor.moveToPrevious());
             }

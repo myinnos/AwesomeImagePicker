@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +58,7 @@ public class CustomVideoSelectAdapter extends CustomGenericAdapter<Video> {
         viewHolder.view.getLayoutParams().width = size;
         viewHolder.view.getLayoutParams().height = size;
 
-        if (arrayList.get(position).isSelected) {
+        if (arrayList.get(position).isSelected()) {
             viewHolder.view.setAlpha(0.5f);
             ((FrameLayout) convertView).setForeground(context.getResources().getDrawable(R.drawable.ic_done_white));
 
@@ -68,9 +67,9 @@ public class CustomVideoSelectAdapter extends CustomGenericAdapter<Video> {
             ((FrameLayout) convertView).setForeground(null);
         }
 
-        if (video.duration != null && !video.duration.equals("")) {
+        if (video.getDuration() != null && !video.getDuration().equals("")) {
             try {
-                long millis = Long.parseLong(video.duration);
+                long millis = Long.parseLong(video.getDuration());
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
                 if (seconds > 59) {
@@ -86,7 +85,7 @@ public class CustomVideoSelectAdapter extends CustomGenericAdapter<Video> {
             }
         }
 
-        Uri uri = Uri.fromFile(new File(video.path));
+        Uri uri = video.getUri();
 
         /*
         Glide.with(context).load(uri)

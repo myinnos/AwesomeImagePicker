@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import in.myinnos.awesomeimagepicker.R;
@@ -52,7 +51,7 @@ public class CustomImageSelectAdapter extends CustomGenericAdapter<Image> {
         viewHolder.view.getLayoutParams().width = size;
         viewHolder.view.getLayoutParams().height = size;
 
-        if (arrayList.get(position).isSelected) {
+        if (arrayList.get(position).isSelected()) {
             viewHolder.view.setAlpha(0.5f);
             ((FrameLayout) convertView).setForeground(context.getResources().getDrawable(R.drawable.ic_done_white));
 
@@ -61,7 +60,7 @@ public class CustomImageSelectAdapter extends CustomGenericAdapter<Image> {
             ((FrameLayout) convertView).setForeground(null);
         }
 
-        Uri uri = Uri.fromFile(new File(arrayList.get(position).path));
+        Uri uri = arrayList.get(position).getUri();
 
         /*
         Glide.with(context).load(uri)
@@ -71,6 +70,7 @@ public class CustomImageSelectAdapter extends CustomGenericAdapter<Image> {
                 .centerCrop()
                 .into(viewHolder.imageView);
                 */
+
         Glide.with(context)
                 .load(uri)
                 .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))

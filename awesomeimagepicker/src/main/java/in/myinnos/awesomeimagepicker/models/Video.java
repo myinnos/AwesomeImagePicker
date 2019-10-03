@@ -1,5 +1,6 @@
 package in.myinnos.awesomeimagepicker.models;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -7,17 +8,17 @@ import android.os.Parcelable;
  * Created by MyInnos on 03-11-2016.
  */
 public class Video implements Parcelable {
-    public long id;
-    public String name;
-    public String duration;
-    public String path;
-    public boolean isSelected;
+    private long id;
+    private String name;
+    private String duration;
+    private Uri uri;
+    private boolean isSelected;
 
-    public Video(long id, String name, String duration, String path, boolean isSelected) {
+    public Video(long id, String name, String duration, Uri uri, boolean isSelected) {
         this.id = id;
         this.name = name;
         this.duration = duration;
-        this.path = path;
+        this.uri = uri;
         this.isSelected = isSelected;
     }
 
@@ -31,7 +32,7 @@ public class Video implements Parcelable {
         dest.writeLong(id);
         dest.writeString(name);
         dest.writeString(duration);
-        dest.writeString(path);
+        dest.writeString(uri.toString());
     }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
@@ -50,6 +51,46 @@ public class Video implements Parcelable {
         id = in.readLong();
         name = in.readString();
         duration = in.readString();
-        path = in.readString();
+        uri = Uri.parse(in.readString());
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public Uri getUri() {
+        return uri;
+    }
+
+    public void setUri(Uri uri) {
+        this.uri = uri;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
     }
 }
