@@ -1,5 +1,8 @@
 package in.myinnos.awesomeimagepicker.helpers;
 
+import android.net.Uri;
+import android.provider.MediaStore;
+
 import in.myinnos.awesomeimagepicker.models.MediaStoreType;
 
 /**
@@ -24,15 +27,33 @@ public class ConstantsCustomGallery {
 
     public static final String INTENT_EXTRA_ALBUM_ID = "albumId";
     public static final String INTENT_EXTRA_ALBUM = "album";
-    public static final String INTENT_EXTRA_IMAGES = "images";
-    public static final String INTENT_EXTRA_VIDEOS = "videos";
+    public static final String INTENT_EXTRA_MEDIA = "media";
     public static final String INTENT_EXTRA_LIMIT = "limit";
     public static final String INTENT_EXTRA_MEDIASTORETYPE = "mediaStoreType";
     public static final int DEFAULT_LIMIT = 10;
 
-    //Maximum number of images that can be selected at a time
-    public static int limit;
+    /*
+     * Maximum number of media items that can be selected at a time
+     */
+    public static int limit = DEFAULT_LIMIT;
 
     //Type of media
     public static MediaStoreType mediaStoreType;
+
+    public static Uri getQueryUri() {
+
+        Uri queryUri;
+        switch (mediaStoreType) {
+            case MIXED:
+                queryUri = MediaStore.Files.getContentUri("external");
+                break;
+            case VIDEOS:
+                queryUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                break;
+            default:
+                queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                break;
+        }
+        return queryUri;
+    }
 }

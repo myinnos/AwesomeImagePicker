@@ -19,12 +19,33 @@
         android:scaleType="centerCrop"
         android:textColor="@color/colorPrimary" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/txImageSelects"
-        android:gravity="center"
-        android:text="Choose Image!" />
+    <LinearLayout
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/chooseImage"
+            android:text="Choose Images"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:layout_marginTop="20dp"
+            android:id="@+id/chooseVideo"
+            android:text="Choose Videos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:layout_marginTop="20dp"
+            android:id="@+id/chooseMixed"
+            android:text="Choose Mixed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txImageSelects"

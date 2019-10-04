@@ -16,11 +16,7 @@
             android:screenOrientation="portrait"
             android:hardwareAccelerated="true" />
         <activity
-            android:name=".activities.ImageSelectActivity"
-            android:screenOrientation="portrait"
-            android:hardwareAccelerated="true" />
-        <activity
-            android:name=".activities.VideoSelectActivity"
+            android:name=".activities.MediaSelectActivity"
             android:screenOrientation="portrait"
             android:hardwareAccelerated="true" />
 

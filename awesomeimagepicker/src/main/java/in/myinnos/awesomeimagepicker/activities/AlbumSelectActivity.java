@@ -74,15 +74,17 @@ public class AlbumSelectActivity extends HelperActivity {
         if (intent == null) {
             finish();
         }
+
         ConstantsCustomGallery.limit = intent.getIntExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, ConstantsCustomGallery.DEFAULT_LIMIT);
 
-        ConstantsCustomGallery.mediaStoreType = MediaStoreType.IMAGES;
+        ConstantsCustomGallery.mediaStoreType = MediaStoreType.MIXED;
         if (intent.hasExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIASTORETYPE)) {
             MediaStoreType mediaStoreType = (MediaStoreType) intent.getSerializableExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIASTORETYPE);
-            if (mediaStoreType != null && mediaStoreType == MediaStoreType.VIDEOS) {
-                ConstantsCustomGallery.mediaStoreType = MediaStoreType.VIDEOS;
+            if (mediaStoreType != null) {
+                ConstantsCustomGallery.mediaStoreType = mediaStoreType;
             }
         }
+        System.out.println("DEBUG " + ConstantsCustomGallery.mediaStoreType.name());
 
         errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
@@ -99,12 +101,7 @@ public class AlbumSelectActivity extends HelperActivity {
                 if (albums.get(position).getName().equals(getString(R.string.capture_photo))) {
                     //HelperClass.displayMessageOnScreen(getApplicationContext(), "HMM!", false);
                 } else {
-                    Intent intent = new Intent(getApplicationContext(), ImageSelectActivity.class);
-
-                    if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS) {
-                        intent = new Intent(getApplicationContext(), VideoSelectActivity.class);
-                    }
-
+                    Intent intent = new Intent(getApplicationContext(), MediaSelectActivity.class);
                     intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM, albums.get(position).getName());
                     intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM_ID, albums.get(position).getId());
                     startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
@@ -175,12 +172,7 @@ public class AlbumSelectActivity extends HelperActivity {
             }
         };
 
-        if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS) {
-            getContentResolver().registerContentObserver(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, false, observer);
-        }
-        else {
-            getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);
-        }
+        getContentResolver().registerContentObserver(ConstantsCustomGallery.getQueryUri(), false, observer);
 
         checkPermission();
     }
@@ -279,11 +271,19 @@ public class AlbumSelectActivity extends HelperActivity {
                 sendMessage(ConstantsCustomGallery.FETCH_STARTED);
             }
 
-            Uri externalContentUri = ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS ?
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            Uri externalContentUri = ConstantsCustomGallery.getQueryUri();
+
+            String selection = null;
+            if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.MIXED) {
+                selection = (MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                        + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                        + " OR "
+                        + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                        + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO);
+            }
 
             Cursor cursor = getApplicationContext().getContentResolver().query(externalContentUri, albumProjection,
-                            null, null, MediaStore.Video.Media.DATE_MODIFIED);
+                            selection, null, MediaStore.Video.Media.DATE_MODIFIED);
 
             if (cursor == null) {
                 sendMessage(ConstantsCustomGallery.ERROR);

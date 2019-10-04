@@ -5,5 +5,5 @@ package in.myinnos.awesomeimagepicker.models;
  */
 
 public enum MediaStoreType {
-    IMAGES, VIDEOS
+    IMAGES, VIDEOS, MIXED
 }

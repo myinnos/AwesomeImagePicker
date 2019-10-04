@@ -6,22 +6,24 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import in.myinnos.awesomeimagepicker.activities.AlbumSelectActivity;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
-import in.myinnos.awesomeimagepicker.models.Image;
+import in.myinnos.awesomeimagepicker.models.Media;
+import in.myinnos.awesomeimagepicker.models.MediaStoreType;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
@@ -29,7 +31,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int READ_STORAGE_PERMISSION = 4000;
     private static final int LIMIT = 5;
+
     private ImageView imageView;
+    private Button chooseImage;
+    private Button chooseVideo;
+    private Button chooseMixed;
     private TextView txImageSelects;
 
     @Override
@@ -37,27 +43,51 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txImageSelects = (TextView) findViewById(R.id.txImageSelects);
-        imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setOnClickListener(new View.OnClickListener() {
+        txImageSelects = findViewById(R.id.txImageSelects);
+        imageView = findViewById(R.id.imageView);
+        chooseImage = findViewById(R.id.chooseImage);
+        chooseVideo = findViewById(R.id.chooseVideo);
+        chooseMixed = findViewById(R.id.chooseMixed);
+
+        chooseImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= 23) {
-                    if (!Helper.checkPermissionForExternalStorage(MainActivity.this)) {
-                        Helper.requestStoragePermission(MainActivity.this, READ_STORAGE_PERMISSION);
-                    } else {
-                        // opining custom gallery
-                        Intent intent = new Intent(MainActivity.this, AlbumSelectActivity.class);
-                        intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, LIMIT);
-                        startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
-                    }
-                }else{
-                    Intent intent = new Intent(MainActivity.this, AlbumSelectActivity.class);
-                    intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, LIMIT);
-                    startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
-                }
+                choose(MediaStoreType.IMAGES);
             }
         });
+
+        chooseVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                choose(MediaStoreType.VIDEOS);
+            }
+        });
+
+        chooseMixed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                choose(MediaStoreType.MIXED);
+            }
+        });
+    }
+
+    private void choose(MediaStoreType type) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!Helper.checkPermissionForExternalStorage(MainActivity.this)) {
+                Helper.requestStoragePermission(MainActivity.this, READ_STORAGE_PERMISSION);
+            } else {
+                // opining custom gallery
+                Intent intent = new Intent(MainActivity.this, AlbumSelectActivity.class);
+                intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, LIMIT);
+                intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIASTORETYPE, type);
+                startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
+            }
+        } else {
+            Intent intent = new Intent(MainActivity.this, AlbumSelectActivity.class);
+            intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_LIMIT, LIMIT);
+            intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIASTORETYPE, type);
+            startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
+        }
     }
 
     @Override
@@ -66,10 +96,13 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == ConstantsCustomGallery.REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             //The array list has the image paths of the selected images
-            ArrayList<Image> images = data.getParcelableArrayListExtra(ConstantsCustomGallery.INTENT_EXTRA_IMAGES);
+            ArrayList<Media> media = data.getParcelableArrayListExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIA);
 
-            for (int i = 0; i < images.size(); i++) {
-                Uri uri = Uri.fromFile(new File(images.get(i).path));
+            txImageSelects.setText("");
+
+            for (int i=0; i<media.size(); i++) {
+
+                Uri uri = media.get(i).getUri();
 
                 /*
                 Glide.with(this).load(uri)

@@ -26,9 +26,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import in.myinnos.awesomeimagepicker.R;
-import in.myinnos.awesomeimagepicker.adapter.CustomImageSelectAdapter;
+import in.myinnos.awesomeimagepicker.adapter.CustomMediaSelectAdapter;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
 import in.myinnos.awesomeimagepicker.models.Image;
+import in.myinnos.awesomeimagepicker.models.Media;
+import in.myinnos.awesomeimagepicker.models.MediaStoreType;
+import in.myinnos.awesomeimagepicker.models.Video;
 
 import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_in;
 import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
@@ -36,8 +39,9 @@ import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
 /**
  * Created by MyInnos on 03-11-2016.
  */
-public class ImageSelectActivity extends HelperActivity {
-    private ArrayList<Image> images;
+public class MediaSelectActivity extends HelperActivity {
+
+    private ArrayList<Media> media;
     private String album;
     private long albumId;
 
@@ -46,8 +50,7 @@ public class ImageSelectActivity extends HelperActivity {
 
     private ProgressBar loader;
     private GridView gridView;
-    private CustomImageSelectAdapter adapter;
-
+    private CustomMediaSelectAdapter adapter;
 
     private int countSelected;
 
@@ -55,9 +58,19 @@ public class ImageSelectActivity extends HelperActivity {
     private Handler handler;
     private Thread thread;
 
-    private final String[] projection = new String[] {
+    private final String[] projectionVideos = new String[] {
             MediaStore.MediaColumns._ID,
-            MediaStore.MediaColumns.DISPLAY_NAME
+            MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.MediaColumns.DURATION,
+            MediaStore.MediaColumns.SIZE,
+            MediaStore.MediaColumns.MIME_TYPE
+    };
+
+    private final String[] projectionImages = new String[] {
+            MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.MediaColumns.SIZE,
+            MediaStore.MediaColumns.MIME_TYPE
     };
 
     @Override
@@ -69,7 +82,6 @@ public class ImageSelectActivity extends HelperActivity {
         tvProfile = findViewById(R.id.tvProfile);
         tvAdd = findViewById(R.id.tvAdd);
         tvSelectCount = findViewById(R.id.tvSelectCount);
-        tvProfile.setText(R.string.image_view);
         liFinish = findViewById(R.id.liFinish);
 
         Intent intent = getIntent();
@@ -78,6 +90,17 @@ public class ImageSelectActivity extends HelperActivity {
         }
         album = intent.getStringExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM);
         albumId = intent.getLongExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM_ID, 0);
+
+        int profile = R.string.media_view;
+        switch (ConstantsCustomGallery.mediaStoreType) {
+            case VIDEOS:
+                profile = R.string.video_view;
+                break;
+            case IMAGES:
+                profile = R.string.image_view;
+                break;
+        }
+        tvProfile.setText(profile);
 
         errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
@@ -133,7 +156,7 @@ public class ImageSelectActivity extends HelperActivity {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case ConstantsCustomGallery.PERMISSION_GRANTED: {
-                        loadImages();
+                        loadMedia();
                         break;
                     }
 
@@ -145,13 +168,13 @@ public class ImageSelectActivity extends HelperActivity {
 
                     case ConstantsCustomGallery.FETCH_COMPLETED: {
                         /*
-                        If adapter is null, this implies that the loaded images will be shown
+                        If adapter is null, this implies that the loaded videos will be shown
                         for the first time, hence send FETCH_COMPLETED message.
                         However, if adapter has been initialised, this thread was run either
                         due to the activity being restarted or content being changed.
                          */
                         if (adapter == null) {
-                            adapter = new CustomImageSelectAdapter(ImageSelectActivity.this, getApplicationContext(), images);
+                            adapter = new CustomMediaSelectAdapter(MediaSelectActivity.this, getApplicationContext(), media);
                             gridView.setAdapter(adapter);
 
                             loader.setVisibility(View.GONE);
@@ -161,7 +184,7 @@ public class ImageSelectActivity extends HelperActivity {
                         } else {
                             adapter.notifyDataSetChanged();
                             /*
-                            Some selected images may have been deleted
+                            Some selected videos may have been deleted
                             hence update action mode title
                              */
                             countSelected = msg.arg1;
@@ -190,10 +213,10 @@ public class ImageSelectActivity extends HelperActivity {
         observer = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
-                loadImages();
+                loadMedia();
             }
         };
-        getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, observer);
+        getContentResolver().registerContentObserver(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, false, observer);
 
         checkPermission();
     }
@@ -217,7 +240,7 @@ public class ImageSelectActivity extends HelperActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        images = null;
+        media = null;
         if (adapter != null) {
             adapter.releaseResources();
         }
@@ -257,17 +280,28 @@ public class ImageSelectActivity extends HelperActivity {
     }
 
     private void toggleSelection(int position) {
-        if (!images.get(position).isSelected() && countSelected >= ConstantsCustomGallery.limit) {
+        if (!media.get(position).isSelected() && countSelected >= ConstantsCustomGallery.limit) {
+
+            int message = R.string.media_limit_exceeded;
+            switch (ConstantsCustomGallery.mediaStoreType) {
+                case VIDEOS:
+                    message = R.string.video_limit_exceeded;
+                    break;
+                case IMAGES:
+                    message = R.string.image_limit_exceeded;
+                    break;
+            }
+
             Toast.makeText(
                     getApplicationContext(),
-                    String.format(getString(R.string.image_limit_exceeded), ConstantsCustomGallery.limit),
+                    String.format(getString(message), ConstantsCustomGallery.limit),
                     Toast.LENGTH_SHORT)
                     .show();
             return;
         }
 
-        images.get(position).setSelected(!images.get(position).isSelected());
-        if (images.get(position).isSelected()) {
+        media.get(position).setSelected(!media.get(position).isSelected());
+        if (media.get(position).isSelected()) {
             countSelected++;
         } else {
             countSelected--;
@@ -280,74 +314,90 @@ public class ImageSelectActivity extends HelperActivity {
         tvAdd.setVisibility(View.GONE);
         tvSelectCount.setVisibility(View.GONE);
 
-        for (int i = 0, l = images.size(); i < l; i++) {
-            images.get(i).setSelected(false);
+        for (int i = 0, l = media.size(); i < l; i++) {
+            media.get(i).setSelected(false);
         }
         countSelected = 0;
         adapter.notifyDataSetChanged();
     }
 
-    private ArrayList<Image> getSelected() {
-        ArrayList<Image> selectedImages = new ArrayList<>();
-        for (int i = 0, l = images.size(); i < l; i++) {
-            if (images.get(i).isSelected()) {
-                selectedImages.add(images.get(i));
+    private ArrayList<Media> getSelected() {
+        ArrayList<Media> selectedVideos = new ArrayList<>();
+        for (int i = 0, l = media.size(); i < l; i++) {
+            if (media.get(i).isSelected()) {
+                selectedVideos.add(media.get(i));
             }
         }
-        return selectedImages;
+        return selectedVideos;
     }
 
     private void sendIntent() {
         Intent intent = new Intent();
-        intent.putParcelableArrayListExtra(ConstantsCustomGallery.INTENT_EXTRA_IMAGES, getSelected());
+        intent.putParcelableArrayListExtra(ConstantsCustomGallery.INTENT_EXTRA_MEDIA, getSelected());
         setResult(RESULT_OK, intent);
         finish();
         overridePendingTransition(abc_fade_in, abc_fade_out);
     }
 
-    private void loadImages() {
-        startThread(new ImageLoaderRunnable());
+    private void loadMedia() {
+        startThread(new MediaLoaderRunnable());
     }
 
-    private class ImageLoaderRunnable implements Runnable {
+    private class MediaLoaderRunnable implements Runnable {
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             /*
             If the adapter is null, this is first time this activity's view is
             being shown, hence send FETCH_STARTED message to show progress bar
-            while images are loaded from phone
+            while videos are loaded from phone
              */
             if (adapter == null) {
                 sendMessage(ConstantsCustomGallery.FETCH_STARTED);
             }
 
-            HashSet<Long> selectedImages = new HashSet<>();
-            if (images != null) {
-                Image image;
-                for (int i = 0, l = images.size(); i < l; i++) {
-                    image = images.get(i);
-                    if (image.isSelected()) {
-                        selectedImages.add(image.getId());
+            HashSet<Long> selectedMedia = new HashSet<>();
+            if (media != null) {
+                for (Media m : media) {
+                    if (m.isSelected()) {
+                        selectedMedia.add(m.getId());
                     }
                 }
             }
 
-            Cursor cursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
-                    MediaStore.MediaColumns.BUCKET_ID + " =?", new String[]{""+albumId}, MediaStore.MediaColumns.DATE_ADDED);
+            String selection = MediaStore.MediaColumns.BUCKET_ID + " = ?";
+            String[] selectionArgs = new String[] {"" + albumId};
+
+            String[] projection = projectionVideos;
+            if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.IMAGES) {
+                projection = projectionImages;
+            }
+
+            if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.MIXED) {
+                selection += " AND (" + MediaStore.Files.FileColumns.MEDIA_TYPE + " = ? OR "
+                        + MediaStore.Files.FileColumns.MEDIA_TYPE + " = ?)";
+
+                selectionArgs = new String[] {
+                        "" + albumId,
+                        "" + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO,
+                        "" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE};
+            }
+
+            Cursor cursor = getContentResolver().query(ConstantsCustomGallery.getQueryUri(),
+                    projection, selection, selectionArgs, MediaStore.MediaColumns.DATE_ADDED);
             if (cursor == null) {
                 sendMessage(ConstantsCustomGallery.ERROR);
                 return;
             }
 
             /*
-            In case this runnable is executed to onChange calling loadImages,
+            In case this runnable is executed to onChange calling loadMedia,
             using countSelected variable can result in a race condition. To avoid that,
-            tempCountSelected keeps track of number of selected images. On handling
+            tempCountSelected keeps track of number of selected videos. On handling
             FETCH_COMPLETED message, countSelected is assigned value of tempCountSelected.
              */
             int tempCountSelected = 0;
-            ArrayList<Image> temp = new ArrayList<>(cursor.getCount());
+            ArrayList<Media> temp = new ArrayList<>(cursor.getCount());
             if (cursor.moveToLast()) {
                 do {
                     if (Thread.interrupted()) {
@@ -356,32 +406,62 @@ public class ImageSelectActivity extends HelperActivity {
 
                     long id = cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
                     String name = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME));
+                    long duration = 0;
+                    if (ConstantsCustomGallery.mediaStoreType != MediaStoreType.IMAGES) {
+                        duration = cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns.DURATION));
+                    }
+                    long size = cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns.SIZE));
+                    String mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE));
 
-                    Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+                    Uri uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id);
+                    if (mimeType.startsWith("image")) {
+                        uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+                    }
+
+                    System.out.println("MIME " + mimeType);
 
                     try {
                         getContentResolver().openFileDescriptor(uri, "r");
                     } catch (Exception e) {
                         // File doesn't actually exist
+                        System.out.println("OOPS " + id + " - " + name);
                         continue;
                     }
 
-                    boolean isSelected = selectedImages.contains(id);
+                    boolean isSelected = selectedMedia.contains(id);
                     if (isSelected) {
                         tempCountSelected++;
                     }
 
-                    temp.add(new Image(id, name, uri, isSelected));
+                    if (mimeType.startsWith("image")) {
+                        Image image = new Image();
+                        image.setId(id);
+                        image.setName(name);
+                        image.setSize(size);
+                        image.setMimeType(mimeType);
+                        image.setUri(uri);
+                        temp.add(image);
+                    } else {
+                        Video video = new Video();
+                        video.setId(id);
+                        video.setName(name);
+                        video.setSize(size);
+                        video.setMimeType(mimeType);
+                        video.setDuration(duration);
+                        video.setUri(uri);
+                        temp.add(video);
+                    }
+                    //temp.add();
 
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
 
-            if (images == null) {
-                images = new ArrayList<>();
+            if (media == null) {
+                media = new ArrayList<>();
             }
-            images.clear();
-            images.addAll(temp);
+            media.clear();
+            media.addAll(temp);
 
             sendMessage(ConstantsCustomGallery.FETCH_COMPLETED, tempCountSelected);
         }

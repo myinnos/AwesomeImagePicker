@@ -2,24 +2,16 @@ package in.myinnos.awesomeimagepicker.models;
 
 import android.net.Uri;
 import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * Created by MyInnos on 03-11-2016.
  */
-public class Video implements Parcelable {
-    private long id;
-    private String name;
-    private String duration;
-    private Uri uri;
-    private boolean isSelected;
+public class Video extends Media {
 
-    public Video(long id, String name, String duration, Uri uri, boolean isSelected) {
-        this.id = id;
-        this.name = name;
-        this.duration = duration;
-        this.uri = uri;
-        this.isSelected = isSelected;
+    private long duration;
+
+    public Video() {
+
     }
 
     @Override
@@ -29,10 +21,12 @@ public class Video implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
-        dest.writeString(name);
-        dest.writeString(duration);
-        dest.writeString(uri.toString());
+        dest.writeLong(getId());
+        dest.writeString(getName());
+        dest.writeLong(getDuration());
+        dest.writeLong(getSize());
+        dest.writeString(getMimeType());
+        dest.writeString(getUri().toString());
     }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
@@ -48,49 +42,19 @@ public class Video implements Parcelable {
     };
 
     private Video(Parcel in) {
-        id = in.readLong();
-        name = in.readString();
-        duration = in.readString();
-        uri = Uri.parse(in.readString());
+        setId(in.readLong());
+        setName(in.readString());
+        setDuration(in.readLong());
+        setSize(in.readLong());
+        setMimeType(in.readString());
+        setUri(Uri.parse(in.readString()));
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDuration() {
+    public long getDuration() {
         return duration;
     }
 
-    public void setDuration(String duration) {
+    public void setDuration(long duration) {
         this.duration = duration;
-    }
-
-    public Uri getUri() {
-        return uri;
-    }
-
-    public void setUri(Uri uri) {
-        this.uri = uri;
-    }
-
-    public boolean isSelected() {
-        return isSelected;
-    }
-
-    public void setSelected(boolean selected) {
-        isSelected = selected;
     }
 }
