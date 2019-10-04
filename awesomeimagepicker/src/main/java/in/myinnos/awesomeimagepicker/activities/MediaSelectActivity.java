@@ -418,13 +418,10 @@ public class MediaSelectActivity extends HelperActivity {
                         uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
                     }
 
-                    System.out.println("MIME " + mimeType);
-
                     try {
                         getContentResolver().openFileDescriptor(uri, "r");
                     } catch (Exception e) {
                         // File doesn't actually exist
-                        System.out.println("OOPS " + id + " - " + name);
                         continue;
                     }
 
@@ -440,6 +437,7 @@ public class MediaSelectActivity extends HelperActivity {
                         image.setSize(size);
                         image.setMimeType(mimeType);
                         image.setUri(uri);
+                        image.setSelected(isSelected);
                         temp.add(image);
                     } else {
                         Video video = new Video();
@@ -449,9 +447,9 @@ public class MediaSelectActivity extends HelperActivity {
                         video.setMimeType(mimeType);
                         video.setDuration(duration);
                         video.setUri(uri);
+                        video.setSelected(isSelected);
                         temp.add(video);
                     }
-                    //temp.add();
 
                 } while (cursor.moveToPrevious());
             }
