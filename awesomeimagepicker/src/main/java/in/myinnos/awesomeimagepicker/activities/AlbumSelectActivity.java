@@ -84,7 +84,6 @@ public class AlbumSelectActivity extends HelperActivity {
                 ConstantsCustomGallery.mediaStoreType = mediaStoreType;
             }
         }
-        System.out.println("DEBUG " + ConstantsCustomGallery.mediaStoreType.name());
 
         errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
