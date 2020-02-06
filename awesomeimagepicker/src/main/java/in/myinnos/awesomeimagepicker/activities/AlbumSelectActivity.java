@@ -121,9 +121,9 @@ public class AlbumSelectActivity extends HelperActivity {
     protected void onStart() {
         super.onStart();
 
-        handler = new Handler() {
+        handler = new Handler(new Handler.Callback() {
             @Override
-            public void handleMessage(Message msg) {
+            public boolean handleMessage(Message msg) {
                 switch (msg.what) {
                     case ConstantsCustomGallery.PERMISSION_GRANTED: {
                         loadAlbums();
@@ -136,7 +136,7 @@ public class AlbumSelectActivity extends HelperActivity {
                         break;
                     }
 
-                    case ConstantsCustomGallery.FETCH_COMPLETED: {
+                    case ConstantsCustomGallery.FETCH_UPDATED: {
                         if (adapter == null) {
                             adapter = new CustomAlbumSelectAdapter(AlbumSelectActivity.this, getApplicationContext(),
                                     albums, ConstantsCustomGallery.mediaStoreType);
@@ -157,13 +157,10 @@ public class AlbumSelectActivity extends HelperActivity {
                         errorDisplay.setVisibility(View.VISIBLE);
                         break;
                     }
-
-                    default: {
-                        super.handleMessage(msg);
-                    }
                 }
+                return true;
             }
-        };
+        });
         observer = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
@@ -289,7 +286,14 @@ public class AlbumSelectActivity extends HelperActivity {
                 return;
             }
 
-            ArrayList<Album> temp = new ArrayList<>(cursor.getCount());
+            int itemCount = 0;
+            int pageCount = 50;
+
+            if (albums == null) {
+                albums = new ArrayList<>();
+            }
+            albums.clear();
+
             HashSet<Long> albumSet = new HashSet<>();
             if (cursor.moveToLast()) {
                 do {
@@ -304,7 +308,7 @@ public class AlbumSelectActivity extends HelperActivity {
 
                         Uri uri = getThumbnail(externalContentUri, id);
 
-                        temp.add(new Album(id, name, uri));
+                        albums.add(new Album(id, name, uri));
 
                         /*if (!album.equals("Hiding particular folder")) {
                             temp.add(new Album(album, image));
@@ -312,18 +316,23 @@ public class AlbumSelectActivity extends HelperActivity {
                         albumSet.add(id);
                     }
 
+                    itemCount++;
+
+                    /*
+                     * This will show thumbnails every time 50 items are loaded
+                     */
+                    if (cursor.isFirst() || itemCount > pageCount) {
+                        sendMessage(ConstantsCustomGallery.FETCH_UPDATED);
+                        itemCount = 0;
+                    }
+
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
 
-            if (albums == null) {
-                albums = new ArrayList<>();
-            }
-            albums.clear();
             // adding taking photo from camera option!
             /*albums.add(new Album(getString(R.string.capture_photo),
                     "https://image.freepik.com/free-vector/flat-white-camera_23-2147490625.jpg"));*/
-            albums.addAll(temp);
 
             sendMessage(ConstantsCustomGallery.FETCH_COMPLETED);
         }

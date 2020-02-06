@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Locale;
 
 import in.myinnos.awesomeimagepicker.R;
 import in.myinnos.awesomeimagepicker.adapter.CustomMediaSelectAdapter;
@@ -100,7 +101,7 @@ public class MediaSelectActivity extends HelperActivity {
                 profile = R.string.image_view;
                 break;
         }
-        tvProfile.setText(profile);
+        tvProfile.setText(String.format(Locale.ENGLISH, getString(profile), ConstantsCustomGallery.limit));
 
         errorDisplay = findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
@@ -151,9 +152,9 @@ public class MediaSelectActivity extends HelperActivity {
     protected void onStart() {
         super.onStart();
 
-        handler = new Handler() {
+        handler = new Handler(new Handler.Callback() {
             @Override
-            public void handleMessage(Message msg) {
+            public boolean handleMessage(Message msg) {
                 switch (msg.what) {
                     case ConstantsCustomGallery.PERMISSION_GRANTED: {
                         loadMedia();
@@ -166,12 +167,9 @@ public class MediaSelectActivity extends HelperActivity {
                         break;
                     }
 
-                    case ConstantsCustomGallery.FETCH_COMPLETED: {
+                    case ConstantsCustomGallery.FETCH_UPDATED: {
                         /*
-                        If adapter is null, this implies that the loaded videos will be shown
-                        for the first time, hence send FETCH_COMPLETED message.
-                        However, if adapter has been initialised, this thread was run either
-                        due to the activity being restarted or content being changed.
+                         * Every 50 items we will update the adapter.
                          */
                         if (adapter == null) {
                             adapter = new CustomMediaSelectAdapter(MediaSelectActivity.this, getApplicationContext(), media);
@@ -180,20 +178,23 @@ public class MediaSelectActivity extends HelperActivity {
                             loader.setVisibility(View.GONE);
                             gridView.setVisibility(View.VISIBLE);
                             orientationBasedUI(getResources().getConfiguration().orientation);
-
                         } else {
                             adapter.notifyDataSetChanged();
-                            /*
-                            Some selected videos may have been deleted
-                            hence update action mode title
-                             */
-                            countSelected = msg.arg1;
+                        }
+                        break;
+                    }
+
+                    case ConstantsCustomGallery.FETCH_COMPLETED: {
+                        /*
+                         * This will update the selected count
+                         */
+                        countSelected = msg.arg1;
+                        if (countSelected > 0) {
                             //actionMode.setTitle(countSelected + " " + getString(R.string.selected));
                             tvSelectCount.setText(countSelected + " " + getString(R.string.selected));
                             tvSelectCount.setVisibility(View.VISIBLE);
                             tvAdd.setVisibility(View.VISIBLE);
                             tvProfile.setVisibility(View.GONE);
-
                         }
                         break;
                     }
@@ -203,13 +204,10 @@ public class MediaSelectActivity extends HelperActivity {
                         errorDisplay.setVisibility(View.VISIBLE);
                         break;
                     }
-
-                    default: {
-                        super.handleMessage(msg);
-                    }
                 }
+                return true;
             }
-        };
+        });
         observer = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -390,14 +388,14 @@ public class MediaSelectActivity extends HelperActivity {
                 return;
             }
 
-            /*
-            In case this runnable is executed to onChange calling loadMedia,
-            using countSelected variable can result in a race condition. To avoid that,
-            tempCountSelected keeps track of number of selected videos. On handling
-            FETCH_COMPLETED message, countSelected is assigned value of tempCountSelected.
-             */
-            int tempCountSelected = 0;
-            ArrayList<Media> temp = new ArrayList<>(cursor.getCount());
+            int itemCount = 0;
+            int pageCount = 50;
+
+            if (media == null) {
+                media = new ArrayList<>();
+            }
+            media.clear();
+
             if (cursor.moveToLast()) {
                 do {
                     if (Thread.interrupted()) {
@@ -426,9 +424,6 @@ public class MediaSelectActivity extends HelperActivity {
                     }
 
                     boolean isSelected = selectedMedia.contains(id);
-                    if (isSelected) {
-                        tempCountSelected++;
-                    }
 
                     if (mimeType.startsWith("image")) {
                         Image image = new Image();
@@ -438,7 +433,7 @@ public class MediaSelectActivity extends HelperActivity {
                         image.setMimeType(mimeType);
                         image.setUri(uri);
                         image.setSelected(isSelected);
-                        temp.add(image);
+                        media.add(image);
                     } else {
                         Video video = new Video();
                         video.setId(id);
@@ -448,18 +443,39 @@ public class MediaSelectActivity extends HelperActivity {
                         video.setDuration(duration);
                         video.setUri(uri);
                         video.setSelected(isSelected);
-                        temp.add(video);
+                        media.add(video);
+                    }
+
+                    itemCount++;
+
+                    /*
+                     * This will show thumbnails every time 50 items are loaded
+                     */
+                    if (cursor.isFirst() || itemCount > pageCount) {
+                        sendMessage(ConstantsCustomGallery.FETCH_UPDATED);
+                        itemCount = 0;
                     }
 
                 } while (cursor.moveToPrevious());
             }
             cursor.close();
 
-            if (media == null) {
-                media = new ArrayList<>();
+            /*
+            In case this runnable is executed to onChange calling loadMedia,
+            using countSelected variable can result in a race condition. To avoid that,
+            tempCountSelected keeps track of number of selected videos. On handling
+            FETCH_COMPLETED message, countSelected is assigned value of tempCountSelected.
+             */
+            int tempCountSelected = 0;
+            for (Media m : media) {
+                if (selectedMedia.contains(m.getId())) {
+                    tempCountSelected++;
+                    m.setSelected(true);
+                }
+                else if (m.isSelected()) {
+                    tempCountSelected++;
+                }
             }
-            media.clear();
-            media.addAll(temp);
 
             sendMessage(ConstantsCustomGallery.FETCH_COMPLETED, tempCountSelected);
         }
