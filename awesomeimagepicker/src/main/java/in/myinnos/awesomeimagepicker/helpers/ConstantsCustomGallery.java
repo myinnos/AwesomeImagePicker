@@ -17,6 +17,7 @@ public class ConstantsCustomGallery {
 
     public static final int FETCH_STARTED = 2001;
     public static final int FETCH_COMPLETED = 2002;
+    public static final int FETCH_UPDATED = 2003;
     public static final int ERROR = 2005;
 
     /**

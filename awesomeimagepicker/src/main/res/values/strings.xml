@@ -9,14 +9,14 @@
     <string name="permission_package">package</string>
 
     <string name="album_view">Select album</string>
-    <string name="image_view">Tap to select images</string>
-    <string name="video_view">Tap to select videos</string>
-    <string name="media_view">Tap to select media</string>
+    <string name="image_view">Select up to %s photos</string>
+    <string name="video_view">Select up to %s videos</string>
+    <string name="media_view">Select up to %s photos and videos</string>
 
     <string name="selected">selected</string>
-    <string name="image_limit_exceeded">Can select a maximum of %d images</string>
+    <string name="image_limit_exceeded">Can select a maximum of %d photos</string>
     <string name="video_limit_exceeded">Can select a maximum of %d videos</string>
-    <string name="media_limit_exceeded">Can select a maximum of %d media</string>
+    <string name="media_limit_exceeded">Can select a maximum of %d photos and videos</string>
     <string name="error_null_cursor">Oops, something went wrong!</string>
     <string name="add">ADD</string>
     <string name="capture_photo">Capture Photo</string>
