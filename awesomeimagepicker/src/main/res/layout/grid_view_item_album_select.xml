@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/frame_layout_album_select"
     android:layout_width="match_parent"
@@ -35,5 +36,68 @@
         android:padding="4dp"
         android:textColor="@color/multiple_image_select_primary"
         android:textSize="12sp" />
+
+</FrameLayout>
+-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frame_layout_album_select"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:background="@drawable/rounded_box_white"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/rlThumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="168dp">
+
+            <!--
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/thumbnail"
+                fresco:roundedCornerRadius="10dp"
+                fresco:roundBottomLeft="false"
+                fresco:roundBottomRight="false"
+                fresco:actualImageResource="@drawable/empty_gallery"
+                android:scaleType="centerCrop"
+                android:layout_width="match_parent"
+                android:layout_height="168dp" />
+                -->
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/image_view_album_image"
+                android:layout_width="match_parent"
+                android:layout_height="168dp"
+                android:scaleType="centerCrop" />
+
+            <ImageView
+                android:id="@+id/image_view_icon_play"
+                android:layout_centerInParent="true"
+                android:background="@drawable/ic_aip_play"
+                android:layout_width="25dp"
+                android:layout_height="25dp"/>
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/text_view_album_name"
+            android:layout_below="@+id/rlThumbnail"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:includeFontPadding="false"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </RelativeLayout>
 
 </FrameLayout>

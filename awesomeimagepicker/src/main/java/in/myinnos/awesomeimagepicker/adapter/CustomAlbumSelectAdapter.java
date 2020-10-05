@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.shape.CornerFamily;
 
 import java.util.ArrayList;
 
@@ -51,16 +53,17 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        viewHolder.imageView.getLayoutParams().width = size;
-        viewHolder.imageView.getLayoutParams().height = size;
+//        viewHolder.imageView.getLayoutParams().width = size;
+//        viewHolder.imageView.getLayoutParams().height = size;
 
         viewHolder.textView.setText(arrayList.get(position).getName());
 
-        if (mediaStoreType == MediaStoreType.VIDEOS) {
-            viewHolder.iconPlayView.setVisibility(View.VISIBLE);
-        } else {
-            viewHolder.iconPlayView.setVisibility(View.GONE);
-        }
+//        if (mediaStoreType == MediaStoreType.VIDEOS) {
+//            viewHolder.iconPlayView.setVisibility(View.VISIBLE);
+//        } else {
+//            viewHolder.iconPlayView.setVisibility(View.GONE);
+//        }
+        viewHolder.iconPlayView.setVisibility(View.GONE);
 
         if (arrayList.get(position).getName().equals("Take Photo")) {
 
@@ -74,7 +77,7 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
                     */
             Glide.with(context)
                     .load(arrayList.get(position).getUri())
-                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))
+                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFf2f2f2)))
                     .apply(RequestOptions.overrideOf(200, 200))
                     .apply(RequestOptions.centerCropTransform())
                     .transition(withCrossFade())
@@ -91,18 +94,25 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
                     */
             Glide.with(context)
                     .load(uri)
-                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))
+                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFf2f2f2)))
                     .apply(RequestOptions.overrideOf(200, 200))
                     .apply(RequestOptions.centerCropTransform())
                     .transition(withCrossFade())
                     .into(viewHolder.imageView);
         }
 
+        float radius = context.getResources().getDimension(R.dimen.dp10);
+        viewHolder.imageView.setShapeAppearanceModel(viewHolder.imageView.getShapeAppearanceModel()
+                .toBuilder()
+                .setTopRightCorner(CornerFamily.ROUNDED, radius)
+                .setTopLeftCorner(CornerFamily.ROUNDED, radius)
+                .build());
+
         return convertView;
     }
 
     private static class ViewHolder {
-        ImageView imageView;
+        ShapeableImageView imageView;
         ImageView iconPlayView;
         TextView textView;
     }
