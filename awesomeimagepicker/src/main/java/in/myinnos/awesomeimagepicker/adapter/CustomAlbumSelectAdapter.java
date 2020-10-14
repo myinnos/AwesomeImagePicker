@@ -3,7 +3,6 @@ package in.myinnos.awesomeimagepicker.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -28,11 +27,14 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
 
     private MediaStoreType mediaStoreType;
+    private float radius = 1;
 
     public CustomAlbumSelectAdapter(Activity activity, Context context, ArrayList<Album> albums, MediaStoreType mediaStoreType) {
         super(activity, context, albums);
 
         this.mediaStoreType = mediaStoreType;
+
+        radius = context.getResources().getDimension(R.dimen.dp10);
     }
 
     @Override
@@ -53,47 +55,16 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-//        viewHolder.imageView.getLayoutParams().width = size;
-//        viewHolder.imageView.getLayoutParams().height = size;
+        if (arrayList.get(position) != null) {
 
-        viewHolder.textView.setText(arrayList.get(position).getName());
+            Album album = arrayList.get(position);
 
-//        if (mediaStoreType == MediaStoreType.VIDEOS) {
-//            viewHolder.iconPlayView.setVisibility(View.VISIBLE);
-//        } else {
-//            viewHolder.iconPlayView.setVisibility(View.GONE);
-//        }
-        viewHolder.iconPlayView.setVisibility(View.GONE);
+            viewHolder.textView.setText(album.getName());
 
-        if (arrayList.get(position).getName().equals("Take Photo")) {
+            viewHolder.iconPlayView.setVisibility(View.GONE);
 
-            /*
-            Glide.with(context).load(arrayList.get(position).cover)
-                    .placeholder(0xFFFF4081)
-                    .override(200, 200)
-                    .crossFade()
-                    .centerCrop()
-                    .into(viewHolder.imageView);
-                    */
             Glide.with(context)
-                    .load(arrayList.get(position).getUri())
-                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFf2f2f2)))
-                    .apply(RequestOptions.overrideOf(200, 200))
-                    .apply(RequestOptions.centerCropTransform())
-                    .transition(withCrossFade())
-                    .into(viewHolder.imageView);
-        } else {
-            final Uri uri = arrayList.get(position).getUri();
-            /*
-            Glide.with(context).load(uri)
-                    .placeholder(0xFFFF4081)
-                    .override(200, 200)
-                    .crossFade()
-                    .centerCrop()
-                    .into(viewHolder.imageView);
-                    */
-            Glide.with(context)
-                    .load(uri)
+                    .load(album.getUri())
                     .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFf2f2f2)))
                     .apply(RequestOptions.overrideOf(200, 200))
                     .apply(RequestOptions.centerCropTransform())
@@ -101,7 +72,6 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
                     .into(viewHolder.imageView);
         }
 
-        float radius = context.getResources().getDimension(R.dimen.dp10);
         viewHolder.imageView.setShapeAppearanceModel(viewHolder.imageView.getShapeAppearanceModel()
                 .toBuilder()
                 .setTopRightCorner(CornerFamily.ROUNDED, radius)

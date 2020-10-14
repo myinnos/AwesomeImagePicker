@@ -18,6 +18,6 @@
     <string name="video_limit_exceeded">Can select a maximum of %d videos</string>
     <string name="media_limit_exceeded">Can select a maximum of %d photos and videos</string>
     <string name="error_null_cursor">Oops, something went wrong!</string>
-    <string name="add">ADD</string>
+    <string name="add">DONE</string>
     <string name="capture_photo">Capture Photo</string>
 </resources>

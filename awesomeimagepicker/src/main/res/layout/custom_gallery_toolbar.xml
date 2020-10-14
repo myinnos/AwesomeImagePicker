@@ -27,6 +27,7 @@
                 android:layout_toEndOf="@+id/liFinish"
                 android:layout_centerInParent="true"
                 android:textColor="#000000"
+                android:fontFamily="sans-serif-medium"
                 android:textSize="20sp"
                 android:visibility="gone"/>
 
@@ -37,6 +38,7 @@
                 android:layout_toEndOf="@+id/liFinish"
                 android:layout_centerVertical="true"
                 android:textColor="#000000"
+                android:fontFamily="sans-serif-medium"
                 android:textSize="20sp" />
 
             <TextView
