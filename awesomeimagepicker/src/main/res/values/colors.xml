@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">@color/branding_toolbar</color>
+
+    <color name="branding_toolbar">#f4f7f9</color>
+    <color name="branding_toolbar_statusbar">#b8b8b8</color>
+    <color name="branding_background">#ffffff</color>
 
     <color name="multiple_image_select_primary">#FFFFFF</color>
     <color name="multiple_image_select_albumTextBackground">@color/colorPrimary</color>

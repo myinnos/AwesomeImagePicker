@@ -4,13 +4,16 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.provider.Settings;
+import android.view.View;
+
 import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import android.view.View;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import in.myinnos.awesomeimagepicker.R;
 import in.myinnos.awesomeimagepicker.helpers.ConstantsCustomGallery;
@@ -24,6 +27,10 @@ public class HelperActivity extends Activity {
 
     private final int maxLines = 4;
     private final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+    public static int dpToPx(double dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
 
     protected void checkPermission() {
         if (ContextCompat.checkSelfPermission(this,

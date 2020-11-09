@@ -67,8 +67,8 @@ public class AlbumSelectActivity extends HelperActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_album_select);
-        setView(findViewById(R.id.layout_album_select));
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -213,10 +213,10 @@ public class AlbumSelectActivity extends HelperActivity {
         final DisplayMetrics metrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(metrics);
 
-        if (adapter != null) {
-            int size = orientation == Configuration.ORIENTATION_PORTRAIT ? metrics.widthPixels / 2 : metrics.widthPixels / 4;
-            adapter.setLayoutParams(size);
-        }
+//        if (adapter != null) {
+//            int size = orientation == Configuration.ORIENTATION_PORTRAIT ? metrics.widthPixels / 2 : metrics.widthPixels / 4;
+//            adapter.setLayoutParams(size);
+//        }
         gridView.setNumColumns(orientation == Configuration.ORIENTATION_PORTRAIT ? 2 : 4);
     }
 

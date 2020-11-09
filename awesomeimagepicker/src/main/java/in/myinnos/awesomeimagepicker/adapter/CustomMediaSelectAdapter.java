@@ -72,7 +72,7 @@ public class CustomMediaSelectAdapter extends CustomGenericAdapter<Media> {
 
             Video video = (Video) media;
 
-            viewHolder.iconPlayView.setVisibility(View.VISIBLE);
+            //viewHolder.iconPlayView.setVisibility(View.VISIBLE);
 
             if (video.getDuration() != 0) {
                 long millis = video.getDuration();
@@ -95,17 +95,9 @@ public class CustomMediaSelectAdapter extends CustomGenericAdapter<Media> {
 
         Uri uri = media.getUri();
 
-        /*
-        Glide.with(context).load(uri)
-                .placeholder(0xFFFF4081)
-                .override(200, 200)
-                .crossFade()
-                .centerCrop()
-                .into(viewHolder.imageView);
-                */
         Glide.with(context)
                 .load(uri)
-                .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))
+                .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFf2f2f2)))
                 .apply(RequestOptions.overrideOf(200, 200))
                 .apply(RequestOptions.centerCropTransform())
                 .transition(withCrossFade())

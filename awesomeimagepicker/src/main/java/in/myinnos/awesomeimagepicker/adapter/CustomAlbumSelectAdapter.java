@@ -3,7 +3,6 @@ package in.myinnos.awesomeimagepicker.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -11,6 +10,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.shape.CornerFamily;
 
 import java.util.ArrayList;
 
@@ -26,11 +27,14 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
 
     private MediaStoreType mediaStoreType;
+    private float radius = 1;
 
     public CustomAlbumSelectAdapter(Activity activity, Context context, ArrayList<Album> albums, MediaStoreType mediaStoreType) {
         super(activity, context, albums);
 
         this.mediaStoreType = mediaStoreType;
+
+        radius = context.getResources().getDimension(R.dimen.dp10);
     }
 
     @Override
@@ -51,58 +55,34 @@ public class CustomAlbumSelectAdapter extends CustomGenericAdapter<Album> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        viewHolder.imageView.getLayoutParams().width = size;
-        viewHolder.imageView.getLayoutParams().height = size;
+        if (arrayList.get(position) != null) {
 
-        viewHolder.textView.setText(arrayList.get(position).getName());
+            Album album = arrayList.get(position);
 
-        if (mediaStoreType == MediaStoreType.VIDEOS) {
-            viewHolder.iconPlayView.setVisibility(View.VISIBLE);
-        } else {
+            viewHolder.textView.setText(album.getName());
+
             viewHolder.iconPlayView.setVisibility(View.GONE);
-        }
 
-        if (arrayList.get(position).getName().equals("Take Photo")) {
-
-            /*
-            Glide.with(context).load(arrayList.get(position).cover)
-                    .placeholder(0xFFFF4081)
-                    .override(200, 200)
-                    .crossFade()
-                    .centerCrop()
-                    .into(viewHolder.imageView);
-                    */
             Glide.with(context)
-                    .load(arrayList.get(position).getUri())
-                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))
-                    .apply(RequestOptions.overrideOf(200, 200))
-                    .apply(RequestOptions.centerCropTransform())
-                    .transition(withCrossFade())
-                    .into(viewHolder.imageView);
-        } else {
-            final Uri uri = arrayList.get(position).getUri();
-            /*
-            Glide.with(context).load(uri)
-                    .placeholder(0xFFFF4081)
-                    .override(200, 200)
-                    .crossFade()
-                    .centerCrop()
-                    .into(viewHolder.imageView);
-                    */
-            Glide.with(context)
-                    .load(uri)
-                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFFF4081)))
+                    .load(album.getUri())
+                    .apply(RequestOptions.placeholderOf(new ColorDrawable(0xFFf2f2f2)))
                     .apply(RequestOptions.overrideOf(200, 200))
                     .apply(RequestOptions.centerCropTransform())
                     .transition(withCrossFade())
                     .into(viewHolder.imageView);
         }
+
+        viewHolder.imageView.setShapeAppearanceModel(viewHolder.imageView.getShapeAppearanceModel()
+                .toBuilder()
+                .setTopRightCorner(CornerFamily.ROUNDED, radius)
+                .setTopLeftCorner(CornerFamily.ROUNDED, radius)
+                .build());
 
         return convertView;
     }
 
     private static class ViewHolder {
-        ImageView imageView;
+        ShapeableImageView imageView;
         ImageView iconPlayView;
         TextView textView;
     }
