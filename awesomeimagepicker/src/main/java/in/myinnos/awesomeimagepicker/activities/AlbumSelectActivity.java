@@ -97,14 +97,10 @@ public class AlbumSelectActivity extends HelperActivity {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (albums.get(position).getName().equals(getString(R.string.capture_photo))) {
-                    //HelperClass.displayMessageOnScreen(getApplicationContext(), "HMM!", false);
-                } else {
-                    Intent intent = new Intent(getApplicationContext(), MediaSelectActivity.class);
-                    intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM, albums.get(position).getName());
-                    intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM_ID, albums.get(position).getId());
-                    startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
-                }
+                Intent intent = new Intent(getApplicationContext(), MediaSelectActivity.class);
+                intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM, albums.get(position).getName());
+                intent.putExtra(ConstantsCustomGallery.INTENT_EXTRA_ALBUM_ID, albums.get(position).getId());
+                startActivityForResult(intent, ConstantsCustomGallery.REQUEST_CODE);
             }
         });
 
