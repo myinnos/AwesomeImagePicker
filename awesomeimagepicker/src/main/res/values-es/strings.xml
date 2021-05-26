@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Impresionante selector de imágenes</string>
+
+    <!--Request Permission-->
+    <string name="permission_info">La aplicación requiere el permiso del almacenamiento para ver los archivos.</string>
+    <string name="permission_force">La aplicación requiere permiso del almacenamiento para ver los archivos. Toca en Ajustes y ve a Permisos para activarlo.</string>
+    <string name="permission_ok">Aceptar</string>
+    <string name="permission_settings">Ajustes</string>
+    <string name="permission_package">paquete</string>
+
+    <string name="album_view">Selecciona un álbum</string>
+    <string name="image_view">Selecciona hasta %s fotos</string>
+    <string name="video_view">Selecciona hasta %s videos</string>
+    <string name="media_view">Selecciona hasta %s fotos y videos</string>
+
+    <string name="selected">seleccionado</string>
+    <string name="image_limit_exceeded">Puedes seleccionar un máximo de %d fotos</string>
+    <string name="video_limit_exceeded">Puedes seleccionar un máximo de %d videos</string>
+    <string name="media_limit_exceeded">Puedes seleccionar un máximo de %d fotos y videos</string>
+    <string name="error_null_cursor">¡Ups! Algo salió mal.</string>
+    <string name="add">AGREGAR</string>
+    <string name="capture_photo">Capturar foto</string>
+</resources>
