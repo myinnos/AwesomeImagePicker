@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Capturador de imagens incrível</string>
-
     <!--Request Permission-->
     <string name="permission_info">O aplicativo requer a permissão do Armazenamento para visualizar a mídia.</string>
     <string name="permission_force">O aplicativo requer a permissão do Armazenamento para visualizar a mídia. Clique em Configurações e vá para Permissões para conceder a permissão.</string>

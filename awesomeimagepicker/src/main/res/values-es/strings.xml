@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Impresionante selector de imágenes</string>
-
     <!--Request Permission-->
     <string name="permission_info">La aplicación requiere el permiso del almacenamiento para ver los archivos.</string>
     <string name="permission_force">La aplicación requiere permiso del almacenamiento para ver los archivos. Toca en Ajustes y ve a Permisos para activarlo.</string>
