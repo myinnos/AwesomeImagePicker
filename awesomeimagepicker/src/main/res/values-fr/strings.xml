@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Sélecteur d\'images génial</string>
-
     <!--Request Permission-->
     <string name="permission_info">L\'application nécessite une autorisation de stockage pour afficher les médias.</string>
     <string name="permission_force">L\'application nécessite une autorisation de Storage pour afficher les médias. Appuyez sur Paramètres et accédez à Autorisations pour accorder cette autorisation.</string>

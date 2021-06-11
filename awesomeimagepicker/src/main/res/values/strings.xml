@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Awesome Image Picker</string>
+    <string name="app_name" translatable="false">Awesome Image Picker</string>
 
     <!--Request Permission-->
     <string name="permission_info">App requires permission to Storage to view media.</string>
