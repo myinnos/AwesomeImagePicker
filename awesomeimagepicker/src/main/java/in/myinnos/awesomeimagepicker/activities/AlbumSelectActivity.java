@@ -42,7 +42,7 @@ import static in.myinnos.awesomeimagepicker.R.anim.abc_fade_out;
 public class AlbumSelectActivity extends HelperActivity {
     private ArrayList<Album> albums;
 
-    private TextView errorDisplay, tvProfile;
+    private TextView errorDisplay, tvProfile, emptyMessageDisplay;
     private LinearLayout liFinish;
 
     private ProgressBar loader;
@@ -85,8 +85,7 @@ public class AlbumSelectActivity extends HelperActivity {
             }
         }
 
-        errorDisplay = findViewById(R.id.text_view_error);
-        errorDisplay.setVisibility(View.INVISIBLE);
+        setMessageDisplays();
 
         tvProfile = findViewById(R.id.tvProfile);
         tvProfile.setText(R.string.album_view);
@@ -152,6 +151,11 @@ public class AlbumSelectActivity extends HelperActivity {
                         loader.setVisibility(View.GONE);
                         errorDisplay.setVisibility(View.VISIBLE);
                         break;
+                    }
+
+                    case ConstantsCustomGallery.EMPTY_LIST: {
+                        loader.setVisibility(View.GONE);
+                        emptyMessageDisplay.setVisibility(View.VISIBLE);
                     }
                 }
                 return true;
@@ -250,6 +254,26 @@ public class AlbumSelectActivity extends HelperActivity {
         }
     }
 
+    private void setMessageDisplays() {
+        errorDisplay = findViewById(R.id.text_view_error);
+        errorDisplay.setVisibility(View.INVISIBLE);
+
+        String mediaTypeName;
+
+        if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.VIDEOS) {
+            mediaTypeName = getString(R.string.album_select_videos);
+        }
+        else if (ConstantsCustomGallery.mediaStoreType == MediaStoreType.IMAGES) {
+            mediaTypeName = getString(R.string.album_select_photos);
+        }
+        else {
+            mediaTypeName = getString(R.string.album_select_media);
+        }
+
+        emptyMessageDisplay = findViewById(R.id.textViewEmpty);
+        emptyMessageDisplay.setText(getString(R.string.activity_media_empty, mediaTypeName));
+    }
+
     private void loadAlbums() {
         startThread(new AlbumLoaderRunnable());
     }
@@ -323,6 +347,10 @@ public class AlbumSelectActivity extends HelperActivity {
                     }
 
                 } while (cursor.moveToPrevious());
+            }
+            else {
+                // If here no media to select from
+                sendMessage(ConstantsCustomGallery.EMPTY_LIST);
             }
             cursor.close();
 

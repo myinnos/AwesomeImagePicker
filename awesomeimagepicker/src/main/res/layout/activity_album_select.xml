@@ -20,6 +20,16 @@
         android:visibility="gone" />
 
     <TextView
+        android:id="@+id/textViewEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar_image_picker"
+        android:paddingTop="130dp"
+        android:layout_centerHorizontal="true"
+        android:text="@string/activity_media_empty"
+        android:visibility="gone"/>
+
+    <TextView
         android:id="@+id/text_view_error"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

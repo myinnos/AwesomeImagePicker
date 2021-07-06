@@ -20,4 +20,8 @@
     <string name="error_null_cursor">Oops, something went wrong!</string>
     <string name="add">DONE</string>
     <string name="capture_photo">Capture Photo</string>
+    <string name="activity_media_empty">You have no %1$s on your device to upload.</string>
+    <string name="album_select_videos">videos</string>
+    <string name="album_select_photos">photos</string>
+    <string name="album_select_media">media</string>
 </resources>
